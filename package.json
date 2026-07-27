@@ -1,0 +1,31 @@
+{
+  "name": "trello-clone",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "check-types": "pnpm -r check-types",
+    "dev:web": "pnpm --filter web dev",
+    "dev:server": "pnpm --filter server dev",
+    "check": "oxlint && oxfmt --write"
+  },
+  "dependencies": {
+    "@trello-clone/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@trello-clone/config": "workspace:*",
+    "@types/node": "catalog:",
+    "lefthook": "^2.1.9",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.17.0"
+}

@@ -1,0 +1,3 @@
+{
+  "extends": "@trello-clone/config/tsconfig.base.json"
+}

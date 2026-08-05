@@ -4,10 +4,22 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
+    PORT: z.coerce.number().default(5000),
+
     CORS_ORIGIN: z.url(),
-    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
   },
-  runtimeEnv: process.env,
+
+  runtimeEnv: {
+    PORT: process.env.PORT,
+    CORS_ORIGIN: process.env.CORS_ORIGIN,
+    NODE_ENV: process.env.NODE_ENV,
+  },
+
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+
   emptyStringAsUndefined: true,
 });

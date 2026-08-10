@@ -14,13 +14,16 @@
     "cors": "^2.8.6",
     "dotenv": "catalog:",
     "express": "^5.2.1",
+    "pg": "^8.22.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@trello-clone/config": "workspace:*",
+    "@trello-clone/db": "workspace:*",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "catalog:",
+    "@types/pg": "^8.20.0",
     "tsdown": "^0.22.3",
     "tsx": "^4.22.5",
     "typescript": "catalog:"

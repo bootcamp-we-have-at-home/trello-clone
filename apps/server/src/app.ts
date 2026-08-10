@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
+import { env } from "@trello-clone/env/server";
 
 const app: express.Application = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: env.CORS_ORIGIN,
     credentials: true,
   })
 );

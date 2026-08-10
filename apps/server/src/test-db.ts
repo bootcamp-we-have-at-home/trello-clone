@@ -1,14 +1,14 @@
-import { pool } from "./config/database";
+import { db } from "@trello-clone/db";
 
-async function testDB() {
+async function testDatabase() {
     try {
-        const result = await pool.query("SELECT NOW()");
+        const result = await db.query("SELECT NOW()");
         console.log("Database connected:", result.rows);
     } catch (error) {
         console.error("Database error:", error);
     } finally {
-        await pool.end();
+        await db.end();
     }
 }
 
-testDB();
+testDatabase();

@@ -1,9 +1,12 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     avatar TEXT,
+    state VARCHAR(20) NOT NULL DEFAULT 'active',
+    CONSTRAINT users_state_check
+        CHECK (state IN ('active', 'inactive')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -18,13 +21,16 @@ CREATE TABLE workspaces (
     CONSTRAINT fk_workspace_owner
         FOREIGN KEY (owner_id)
         REFERENCES users(id)
-        ON DELETE CASCADE
+        ON DELETE RESTRICT
+);
+CREATE TYPE workspace_role AS ENUM (
+    'admin',
+    'member'
 );
 CREATE TABLE workspace_members (
     workspace_id INT,
     user_id INT,
-    role VARCHAR(30) DEFAULT 'member',
-
+    role workspace_role DEFAULT 'member',
     PRIMARY KEY (workspace_id, user_id),
 
     FOREIGN KEY (workspace_id)
@@ -33,11 +39,12 @@ CREATE TABLE workspace_members (
 
     FOREIGN KEY (user_id)
         REFERENCES users(id)
-        ON DELETE CASCADE
+        ON DELETE RESTRICT
 );
 CREATE TABLE boards (
     id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
+    description TEXT,
     workspace_id INT NOT NULL,
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -49,35 +56,21 @@ CREATE TABLE boards (
 
     FOREIGN KEY (created_by)
         REFERENCES users(id)
-);
-CREATE TABLE lists (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    position INT NOT NULL,
-    board_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (board_id)
-        REFERENCES boards(id)
-        ON DELETE CASCADE
+        ON DELETE RESTRICT
 );
 CREATE TABLE cards (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    position INT NOT NULL,
+    state VARCHAR(30) NOT NULL DEFAULT 'todo',
     due_date DATE,
-    list_id INT NOT NULL,
-    created_by INT NOT NULL,
+    board_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (list_id)
-        REFERENCES lists(id)
+    FOREIGN KEY (board_id)
+        REFERENCES boards(id)
         ON DELETE CASCADE,
-
-    FOREIGN KEY (created_by)
-        REFERENCES users(id)
 );
 CREATE TABLE comments (
     id SERIAL PRIMARY KEY,
@@ -92,11 +85,17 @@ CREATE TABLE comments (
 
     FOREIGN KEY (user_id)
         REFERENCES users(id)
+        ON DELETE RESTRICT
 );
 CREATE TABLE labels (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    color VARCHAR(20) NOT NULL
+    color VARCHAR(20) NOT NULL,
+    workspace_id INT NOT NULL,
+
+    FOREIGN KEY (workspace_id)
+        REFERENCES workspaces(id)
+        ON DELETE CASCADE
 );
 CREATE TABLE card_labels (
     card_id INT,
@@ -112,7 +111,7 @@ CREATE TABLE card_labels (
         REFERENCES labels(id)
         ON DELETE CASCADE
 );
-CREATE TABLE card_members (
+CREATE TABLE CardAssignee(
     card_id INT,
     user_id INT,
 
@@ -124,7 +123,7 @@ CREATE TABLE card_members (
 
     FOREIGN KEY(user_id)
         REFERENCES users(id)
-        ON DELETE CASCADE
+        ON DELETE RESTRICT
 );
 CREATE TABLE attachments (
     id SERIAL PRIMARY KEY,
@@ -150,4 +149,5 @@ CREATE TABLE activities (
 
     FOREIGN KEY(user_id)
         REFERENCES users(id)
+        ON DELETE RESTRICT
 );

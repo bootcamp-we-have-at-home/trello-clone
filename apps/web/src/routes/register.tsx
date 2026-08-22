@@ -13,13 +13,34 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+  // Validation state
+  const [validationError, setValidationError] = useState("");
   // Submit registration form
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
+    setValidationError("");
 
+      if (!username.trim()) {
+        setValidationError("Username is required");
+        return;
+      }
+
+      if (!email.trim()) {
+        setValidationError("Email is required");
+        return;
+      }
+
+      if (!email.includes("@")) {
+        setValidationError("Please enter a valid email");
+        return;
+      }
+
+      if (password.length < 8) {
+        setValidationError("Password must be at least 8 characters");
+        return;
+      }
     setLoading(true);
     setError("");
     setSuccess("");
@@ -74,7 +95,11 @@ function RegisterPage() {
             {error}
           </p>
         )}
-
+        {validationError && (
+          <p className="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700">
+            {validationError}
+          </p>
+        )}
         {success && (
           <p className="mb-4 rounded-lg bg-green-100 px-4 py-3 text-sm text-green-700">
             {success}

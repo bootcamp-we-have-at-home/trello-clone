@@ -1,9 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute,useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 export const Route = createFileRoute("/register")({
   component: RegisterPage,
 });
 function RegisterPage() {
+  // Navigation
+  const navigate = useNavigate();
   // Register form state
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -70,6 +72,10 @@ function RegisterPage() {
 
       setSuccess("Account created successfully!");
       console.log(data);
+      // Navigate to login page after a short delay
+      // setTimeout(() => {
+      // navigate({ to: "/login" });
+      // }, 1000);
     } catch {
       setError("Unable to connect to server");
     } finally {

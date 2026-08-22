@@ -12,6 +12,8 @@ function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Confirm password state
+  const [confirmPassword, setConfirmPassword] = useState("");
   // Request state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -52,6 +54,11 @@ function RegisterPage() {
       setValidationError("Password must be at least 8 characters");
       return;
     }
+    // Validate confirm password
+    if (confirmPassword !== password) {
+      setValidationError("Passwords do not match");
+      return;
+  }
 
     // Start loading state
     setLoading(true);
@@ -92,9 +99,9 @@ function RegisterPage() {
       // Display response in the browser console
       console.log(data);
       // Navigate to login page after a short delay
-      // setTimeout(() => {
-      // navigate({ to: "/login" });
-      // }, 1000);
+      setTimeout(() => {
+      navigate({ to: "/login" });
+      }, 1000);
     } catch {
       // Handle server connection errors
       setError("Unable to connect to server");
@@ -192,6 +199,25 @@ function RegisterPage() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-900"
+            />
+          </div>
+          {/* Confirm password field */}
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+            >
+              Confirm Password
+            </label>
+
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-900"
             />
           </div>

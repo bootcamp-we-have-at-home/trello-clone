@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { env } from "@trello-clone/env/server";
 import authRoutes from "./routes/auth.js";
+import cookieParser from "cookie-parser";
 const app: express.Application = express();
 
 app.use(
@@ -12,7 +13,7 @@ app.use(
 );
 
 app.use(express.json());
-
+app.use(cookieParser());
 app.get("/", (_req, res) => {
   res.json({
     success: true,

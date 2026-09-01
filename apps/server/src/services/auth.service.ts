@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import {db} from "@trello-clone/db";
-import type { RegisterUserInput } from "../schemas/auth.schema.js";
+import type { RegisterUserInput } from "@trello-clone/schemas";
 
 export const registerUser = async ({
   username,

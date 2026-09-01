@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { registerUser } from "../services/auth.service.js";
-import { registerUserSchema } from "../schemas/auth.schema.js";
-
+import {
+  registerUserSchema,
+} from "@trello-clone/schemas";
 export const registerController = async (
   req: Request,
   res: Response,

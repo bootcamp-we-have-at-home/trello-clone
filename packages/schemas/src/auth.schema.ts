@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 export const registerUserSchema = z.object({
   username: z
     .string()
@@ -15,4 +16,5 @@ export const registerUserSchema = z.object({
     .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters"),
 });
+
 export type RegisterUserInput = z.infer<typeof registerUserSchema>;

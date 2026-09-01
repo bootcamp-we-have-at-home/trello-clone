@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-
+import { Button } from "@trello-clone/ui/components/button";
 // Create the /login route
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -68,12 +68,13 @@ function LoginPage() {
           </div>
 
           {/* Submit button */}
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-400 dark:focus:ring-offset-slate-900"
-          >
-            Login
-          </button>
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+            >
+              Login
+            </Button>
         </form>
 
         {/* Register link */}

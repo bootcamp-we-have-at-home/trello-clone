@@ -1,14 +1,14 @@
 import type { Request, Response } from "express";
-
-import { loginSchema } from "../schemas/auth.schema.js";
-import { registerUserSchema } from "@trello-clone/schemas";
+import {
+  loginSchema,
+  registerUserSchema,
+} from "@trello-clone/schemas";
 
 import {
   registerUser,
   loginUser,
-  createSession,
+  createToken,
   getCurrentUser,
-  deleteSession,
 } from "../services/auth.service.js";
 
 export const registerController = async (
@@ -45,10 +45,8 @@ export async function loginController(
   res: Response,
 ) {
   try {
-    // Validate login data
     const result = loginSchema.safeParse(req.body);
 
-    // Return validation error
     if (!result.success) {
       return res.status(400).json({
         message:
@@ -57,33 +55,31 @@ export async function loginController(
       });
     }
 
-    // Get validated data
     const { email, password } = result.data;
 
-    // Find user and verify password
-    const user = await loginUser(email, password);
+    const user = await loginUser(
+      email,
+      password,
+    );
 
-    // Create authentication session
-    const session = await createSession(user.id);
+    // Create JWT
+    const token = createToken(user.id);
 
-    // Store session token in HTTP-only cookie
-    res.cookie("session", session.token, {
+    // Store JWT in HTTP-only cookie
+    res.cookie("token", token, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Return successful response
     return res.status(200).json({
       message: "Login successful",
       user,
     });
   } catch (error) {
-    // Log server error
     console.error(error);
 
-    // Return invalid credentials error
     return res.status(401).json({
       message: "Invalid email or password",
     });
@@ -95,17 +91,16 @@ export async function meController(
   res: Response,
 ) {
   try {
-    // Get session token from cookie
-    const token = req.cookies.session;
+    // Get JWT from cookie
+    const token = req.cookies.token;
 
-    // Check if session cookie exists
     if (!token) {
       return res.status(401).json({
         message: "Not authenticated",
       });
     }
 
-    // Find current user
+    // Verify JWT and get current user
     const user = await getCurrentUser(token);
 
     return res.status(200).json({
@@ -115,19 +110,18 @@ export async function meController(
     console.error(error);
 
     return res.status(401).json({
-      message: "Invalid or expired session",
+      message: "Invalid or expired token",
     });
   }
 }
-export async function logoutController(req: Request, res: Response) {
+
+export async function logoutController(
+  _req: Request,
+  res: Response,
+) {
   try {
-    const token = req.cookies.session;
-
-    if (token) {
-      await deleteSession(token);
-    }
-
-    res.clearCookie("session", {
+    // Remove JWT cookie
+    res.clearCookie("token", {
       httpOnly: true,
       secure: false,
       sameSite: "lax",

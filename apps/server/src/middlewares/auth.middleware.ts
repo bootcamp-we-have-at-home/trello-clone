@@ -2,17 +2,17 @@ import type { NextFunction, Request, Response } from "express";
 
 import { getCurrentUser } from "../services/auth.service.js";
 
-export const authMiddleware = async (
+export async function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+) {
   try {
-    const token = req.cookies.session;
+    const token = req.cookies.token;
 
     if (!token) {
       return res.status(401).json({
-        message: "Authentication required",
+        message: "Not authenticated",
       });
     }
 
@@ -22,10 +22,10 @@ export const authMiddleware = async (
 
     next();
   } catch (error) {
-    console.error("Authentication error:", error);
+    console.error("Auth middleware error:", error);
 
     return res.status(401).json({
-      message: "Invalid or expired session",
+      message: "Invalid or expired token",
     });
   }
-};
+}

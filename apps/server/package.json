@@ -17,6 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "catalog:",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
     "zod": "catalog:"
   },
@@ -26,6 +27,7 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "catalog:",
     "@types/pg": "^8.20.0",
     "tsdown": "^0.22.3",

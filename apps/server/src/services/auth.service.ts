@@ -1,14 +1,17 @@
 import bcrypt from "bcryptjs";
-import {db} from "@trello-clone/db";
+import jwt from "jsonwebtoken";
+
+import { db } from "@trello-clone/db";
 import type { RegisterUserInput } from "@trello-clone/schemas";
-import crypto from "node:crypto";
+
+const JWT_SECRET =
+  process.env.JWT_SECRET || "trello-clone-development-secret";
 
 export const registerUser = async ({
   username,
   email,
   password,
 }: RegisterUserInput) => {
-    // Check if username or email already exists
   const existingUser = await db.query(
     `
     SELECT id
@@ -23,10 +26,8 @@ export const registerUser = async ({
     throw new Error("Username or email already exists");
   }
 
-  // Hash password
   const passwordHash = await bcrypt.hash(password, 12);
 
-  // Create user
   const result = await db.query(
     `
     INSERT INTO users (
@@ -43,11 +44,16 @@ export const registerUser = async ({
   return result.rows[0];
 };
 
-export async function loginUser(email: string, password: string) {
+export async function loginUser(
+  email: string,
+  password: string,
+) {
   const result = await db.query(
-    `SELECT id, username, email, password_hash, state
-     FROM users
-     WHERE email = $1`,
+    `
+    SELECT id, username, email, password_hash, state
+    FROM users
+    WHERE email = $1
+    `,
     [email],
   );
 
@@ -73,60 +79,54 @@ export async function loginUser(email: string, password: string) {
     state: user.state,
   };
 }
-export async function createSession(userId: number) {
-  // Generate a random session token
-  const token = crypto.randomBytes(32).toString("hex");
 
-  // Set session expiration to 7 days
-  const expiresAt = new Date();
-
-  expiresAt.setDate(expiresAt.getDate() + 7);
-
-  // Save the session in PostgreSQL
-  const result = await db.query(
-    `
-    INSERT INTO sessions (
-      user_id,
-      token,
-      expires_at
-    )
-    VALUES ($1, $2, $3)
-    RETURNING id, user_id, token, expires_at
-    `,
-    [userId, token, expiresAt],
+export function createToken(userId: number) {
+  return jwt.sign(
+    { userId },
+    JWT_SECRET,
+    {
+      expiresIn: "7d",
+    },
   );
-
-  return result.rows[0];
 }
-export async function getCurrentUser(token: string) {
+
+export function verifyToken(token: string) {
+  const payload = jwt.verify(
+    token,
+    JWT_SECRET,
+  ) as jwt.JwtPayload;
+
+  if (
+    typeof payload.userId !== "number"
+  ) {
+    throw new Error("Invalid token");
+  }
+
+  return payload.userId;
+}
+
+export async function getCurrentUser(
+  token: string,
+) {
+  const userId = verifyToken(token);
+
   const result = await db.query(
     `
     SELECT
-      users.id,
-      users.username,
-      users.email,
-      users.state
-    FROM sessions
-    JOIN users ON users.id = sessions.user_id
-    WHERE sessions.token = $1
-      AND sessions.expires_at > NOW()
+      id,
+      username,
+      email,
+      state
+    FROM users
+    WHERE id = $1
     LIMIT 1
     `,
-    [token],
+    [userId],
   );
 
   if (result.rows.length === 0) {
-    throw new Error("Invalid or expired session");
+    throw new Error("User not found");
   }
 
   return result.rows[0];
-}
-export async function deleteSession(token: string) {
-  await db.query(
-    `
-    DELETE FROM sessions
-    WHERE token = $1
-    `,
-    [token],
-  );
 }

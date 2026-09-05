@@ -12,10 +12,9 @@ router.post("/register", registerController);
 router.post("/login", loginController);
 router.get("/me", meController);
 router.post("/logout", logoutController);
-router.get("/protected", authMiddleware, (req, res) => {
-  return res.status(200).json({
-    message: "You have access to this protected route",
-    user: req.user,
+router.get("/protected", authMiddleware, (_req, res) => {
+  res.json({
+    message: "You are authenticated",
   });
 });
 export default router;

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { env } from "@trello-clone/env/server";
 import authRoutes from "./routes/auth.js";
+import workspaceRoutes from "./routes/workspace.routes.js";
 const app: express.Application = express();
 
 app.use(
@@ -12,6 +13,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/api/workspaces", workspaceRoutes);
 
 app.get("/", (_req, res) => {
   res.json({

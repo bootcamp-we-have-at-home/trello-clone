@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-
+import { createFileRoute, Link ,useNavigate} from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 const TITLE_TEXT = `
  ██████╗ ███████╗████████╗████████╗███████╗██████╗
  ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
@@ -23,6 +23,59 @@ export const Route = createFileRoute("/")({
 
 // Home page component
 function HomeComponent() {
+   const navigate = useNavigate();
+   const [user, setUser] = useState<{
+    id: number;
+    username: string;
+    email: string;
+    state: string;
+  } | null>(null);
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/auth/me",
+          {
+            credentials: "include",
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        setUser(data.user);
+      } catch (error) {
+        console.error("Failed to get current user:", error);
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+  // Logout
+const handleLogout = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/auth/logout",
+      {
+        method: "POST",
+        credentials: "include",
+      },
+    );
+
+    if (!response.ok) {
+      console.error("Logout failed");
+      return;
+    }
+
+    setUser(null);
+    navigate({ to: "/" });
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+};
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
 
@@ -40,27 +93,44 @@ function HomeComponent() {
 
           {/* Navigation buttons */}
           <div className="flex items-center gap-3">
+            {user ? (
+              // Show username when user is logged in
+            <>  
+              <span className="rounded-lg bg-slate-100 px-4 py-2 font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                Welcome, {user.username}
+              </span>
+              <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
+                >
+                  Logout
+                </button>
+             </>
+            ) : (
+              // Show Login and Register when user is not logged in
+              <>
+                {/* Login button */}
+                <Link
+                  to="/login"
+                  className="rounded-lg px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  Login
+                </Link>
 
-            {/* Login button */}
-            <Link
-              to="/login"
-              className="rounded-lg px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              Login
-            </Link>
-
-            {/* Register button */}
-            <Link
-              to="/register"
-              className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition hover:bg-blue-700"
-            >
-              Register
-            </Link>
-
+                {/* Register button */}
+                <Link
+                  to="/register"
+                  className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition hover:bg-blue-700"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
+
         </div>
       </nav>
-
       {/* Main content */}
       <main className="container mx-auto max-w-3xl px-4 py-8">
 

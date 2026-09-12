@@ -29,7 +29,7 @@ function RegisterPage() {
     onSubmit: async ({ value }) => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/auth/register",
+          `${import.meta.env.VITE_SERVER_URL}/api/auth/register`, 
           {
             method: "POST",
             headers: {

@@ -34,7 +34,10 @@ function RegisterPage() {
     onSubmit: async ({ value }) => {
       try {
         const serverUrl =
-          import.meta.env.VITE_SERVER_URL.replace(/\/+$/, "");
+          import.meta.env.VITE_SERVER_URL.replace(
+            /\/+$/,
+            "",
+          );
 
         const response = await fetch(
           `${serverUrl}/api/auth/register`,
@@ -57,7 +60,8 @@ function RegisterPage() {
         if (!response.ok) {
           form.setErrorMap({
             onSubmit: {
-              form: data.message || "Registration failed",
+              form:
+                data.message || "Registration failed",
               fields: {},
             },
           });
@@ -90,25 +94,28 @@ function RegisterPage() {
           </p>
         </div>
 
-        {(
-          form.state.errorMap.onSubmit as
-            | {
-                form?: string;
-              }
-            | undefined
-        )?.form && (
-  <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400">
-    {String(
-      (
-        form.state.errorMap.onSubmit as
-          | {
-              form?: string;
+        <form.Subscribe
+          selector={(state) => state.errorMap.onSubmit}
+          children={(onSubmitError) => {
+            const formError = (
+              onSubmitError as
+                | {
+                    form?: string;
+                  }
+                | undefined
+            )?.form;
+
+            if (!formError) {
+              return null;
             }
-          | undefined
-      )?.form,
-    )}
-  </div>
-)}
+
+            return (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400">
+                {formError}
+              </div>
+            );
+          }}
+        />
 
         <form
           onSubmit={(event) => {
@@ -137,7 +144,9 @@ function RegisterPage() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) =>
-                    field.handleChange(event.target.value)
+                    field.handleChange(
+                      event.target.value,
+                    )
                   }
                   aria-invalid={
                     field.state.meta.isTouched &&
@@ -175,7 +184,9 @@ function RegisterPage() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) =>
-                    field.handleChange(event.target.value)
+                    field.handleChange(
+                      event.target.value,
+                    )
                   }
                   aria-invalid={
                     field.state.meta.isTouched &&
@@ -213,7 +224,9 @@ function RegisterPage() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) =>
-                    field.handleChange(event.target.value)
+                    field.handleChange(
+                      event.target.value,
+                    )
                   }
                   aria-invalid={
                     field.state.meta.isTouched &&
@@ -251,7 +264,9 @@ function RegisterPage() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) =>
-                    field.handleChange(event.target.value)
+                    field.handleChange(
+                      event.target.value,
+                    )
                   }
                   aria-invalid={
                     field.state.meta.isTouched &&
@@ -271,13 +286,21 @@ function RegisterPage() {
           />
 
           <form.Subscribe
-            selector={(state) => [state.canSubmit, state.isSubmitting]}
-            children={([canSubmit, isSubmitting]) => (
+            selector={(state) => [
+              state.canSubmit,
+              state.isSubmitting,
+            ]}
+            children={([
+              canSubmit,
+              isSubmitting,
+            ]) => (
               <Button
                 type="submit"
                 size="lg"
                 className="w-full rounded-lg"
-                disabled={!canSubmit || isSubmitting}
+                disabled={
+                  !canSubmit || isSubmitting
+                }
               >
                 {isSubmitting
                   ? "Creating Account..."

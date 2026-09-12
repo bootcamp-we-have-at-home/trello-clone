@@ -24,10 +24,10 @@ export const loginAccountRateLimit = rateLimit({
         ? req.body.email.trim().toLowerCase()
         : "unknown";
 
-    return email;
+    return `${req.ip}:${email}`;
   },
   message: {
     message:
-      "Too many login attempts for this account. Please try again later.",
+      "Too many login attempts. Please try again later.",
   },
 });

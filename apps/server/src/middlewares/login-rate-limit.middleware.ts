@@ -1,11 +1,17 @@
+import type { Request, Response } from "express";
 import { rateLimit } from "express-rate-limit";
 
 const windowMs = 15 * 60 * 1000;
+const requestWasSuccessful = (
+  _req: Request,
+  res: Response,
+) => res.statusCode !== 401;
 
 export const loginIpRateLimit = rateLimit({
   windowMs,
   limit: 20,
   skipSuccessfulRequests: true,
+  requestWasSuccessful,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   message: {
@@ -18,6 +24,7 @@ export const loginAccountRateLimit = rateLimit({
   windowMs,
   limit: 5,
   skipSuccessfulRequests: true,
+  requestWasSuccessful,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   keyGenerator: (req) => {

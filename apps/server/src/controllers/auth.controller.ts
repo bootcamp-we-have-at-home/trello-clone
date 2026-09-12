@@ -117,10 +117,24 @@ export async function meController(
       user,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Get current user error:", error);
 
-    return res.status(401).json({
-      message: "Invalid or expired token",
+    if (
+      error instanceof Error &&
+      (
+        error.message === "Invalid token" ||
+        error.message === "jwt malformed" ||
+        error.message === "jwt expired" ||
+        error.message === "User not found or inactive"
+      )
+    ) {
+      return res.status(401).json({
+        message: "Invalid or expired token",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal server error",
     });
   }
 }

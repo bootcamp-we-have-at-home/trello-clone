@@ -1,10 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+
 import { useForm } from "@tanstack/react-form";
 
 import { registerUserSchema } from "@trello-clone/schemas";
+
 import { Button } from "@trello-clone/ui/components/button";
+
 import { Card } from "@trello-clone/ui/components/card";
+
 import { Input } from "@trello-clone/ui/components/input";
+
 import { Label } from "@trello-clone/ui/components/label";
 
 export const Route = createFileRoute("/register")({
@@ -28,8 +33,11 @@ function RegisterPage() {
 
     onSubmit: async ({ value }) => {
       try {
+        const serverUrl =
+          import.meta.env.VITE_SERVER_URL.replace(/\/+$/, "");
+
         const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/api/auth/register`, 
+          `${serverUrl}/api/auth/register`,
           {
             method: "POST",
             headers: {
@@ -100,7 +108,7 @@ function RegisterPage() {
           onSubmit={(event) => {
             event.preventDefault();
             event.stopPropagation();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
           className="space-y-5"
         >

@@ -3,14 +3,14 @@ import {
   loginSchema,
   registerUserSchema,
 } from "@trello-clone/schemas";
-
+import { env } from "@trello-clone/env/server";
 import {
   registerUser,
   loginUser,
   createToken,
   getCurrentUser,
 } from "../services/auth.service.js";
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = env.NODE_ENV === "production";
 
 export const registerController = async (
   req: Request,
@@ -140,10 +140,18 @@ export async function meController(
 }
 
 export async function logoutController(
-  _req: Request,
+  req: Request,
   res: Response,
 ) {
   try {
+    const origin = req.get("origin");
+
+    if (origin && origin !== env.CORS_ORIGIN) {
+      return res.status(403).json({
+        message: "Invalid request origin",
+      });
+    }
+
     // Remove JWT cookie
     res.clearCookie("token", {
       httpOnly: true,

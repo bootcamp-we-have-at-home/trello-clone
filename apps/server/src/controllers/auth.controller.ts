@@ -10,6 +10,7 @@ import {
   createToken,
   getCurrentUser,
 } from "../services/auth.service.js";
+const isProduction = process.env.NODE_ENV === "production";
 
 export const registerController = async (
   req: Request,
@@ -68,7 +69,7 @@ export async function loginController(
     // Store JWT in HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -123,7 +124,7 @@ export async function logoutController(
     // Remove JWT cookie
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       sameSite: "lax",
     });
 

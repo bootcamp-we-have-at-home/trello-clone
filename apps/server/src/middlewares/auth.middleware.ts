@@ -3,7 +3,10 @@ import type {
   Request,
   Response,
 } from "express";
-
+import {
+  JsonWebTokenError,
+  TokenExpiredError,
+} from "jsonwebtoken";
 import { getCurrentUser } from "../services/auth.service.js";
 
 export async function authMiddleware(
@@ -26,8 +29,17 @@ export async function authMiddleware(
   } catch (error) {
     console.error("Auth middleware error:", error);
 
-    return res.status(401).json({
-      message: "Invalid or expired token",
-    });
+    if (
+      error instanceof JsonWebTokenError ||
+      error instanceof TokenExpiredError ||
+      (error instanceof Error &&
+        error.message === "User not found or inactive")
+    ) {
+      return res.status(401).json({
+        message: "Invalid or expired token",
+      });
+    }
+
+    return next(error);
   }
 }

@@ -65,6 +65,18 @@ function LoginPage() {
         });
       } catch (error) {
         console.error("Login error:", error);
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to connect to server";
+
+        form.setErrorMap({
+          onSubmit: {
+            form: message,
+            fields: {},
+          },
+        });
       }
     },
   });
@@ -89,11 +101,20 @@ function LoginPage() {
             ) => {
               event.preventDefault();
               event.stopPropagation();
-
               void form.handleSubmit();
             }}
             className="space-y-5"
           >
+            {/* Form error */}
+            {form.state.errors.length > 0 && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400">
+                {String(
+                  form.state.errors[0]?.message ??
+                    "Login failed",
+                )}
+              </div>
+            )}
+
             {/* Email */}
             <form.Field
               name="email"
@@ -199,7 +220,6 @@ function LoginPage() {
             {/* Register link */}
             <p className="text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
-
               <Link
                 to="/register"
                 className="font-medium text-primary hover:underline"

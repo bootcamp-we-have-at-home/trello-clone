@@ -52,6 +52,7 @@ export async function loginUser(
     SELECT id, username, email, password_hash, state
     FROM users
     WHERE email = $1
+      AND state = 'active'
     `,
     [email],
   );
@@ -95,9 +96,7 @@ export function verifyToken(token: string) {
     JWT_SECRET,
   ) as jwt.JwtPayload;
 
-  if (
-    typeof payload.userId !== "number"
-  ) {
+  if (typeof payload.userId !== "number") {
     throw new Error("Invalid token");
   }
 
@@ -118,13 +117,14 @@ export async function getCurrentUser(
       state
     FROM users
     WHERE id = $1
+      AND state = 'active'
     LIMIT 1
     `,
     [userId],
   );
 
   if (result.rows.length === 0) {
-    throw new Error("User not found");
+    throw new Error("User not found or inactive");
   }
 
   return result.rows[0];

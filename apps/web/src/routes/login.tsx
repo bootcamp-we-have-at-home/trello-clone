@@ -40,8 +40,13 @@ function LoginPage() {
 
     onSubmit: async ({ value }) => {
       try {
+        const serverUrl =
+          import.meta.env.VITE_SERVER_URL.replace(
+            /\/+$/,
+            "",
+          );2
         const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/api/auth/login`,
+          `${serverUrl}/api/auth/login`,
           {
             method: "POST",
             headers: {
@@ -109,8 +114,13 @@ function LoginPage() {
             {form.state.errors.length > 0 && (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400">
                 {String(
-                  form.state.errors[0]?.message ??
-                    "Login failed",
+                  (
+                    form.state.errorMap.onSubmit as
+                      | {
+                          form?: string;
+                        }
+                      | undefined
+                  )?.form ?? "Login failed",
                 )}
               </div>
             )}

@@ -15,14 +15,14 @@ export const registerUser = async ({
   password,
 }: RegisterUserInput) => {
   const existingUser = await db.query(
-    `
-    SELECT id
-    FROM users
-    WHERE username = $1 OR email = $2
-    LIMIT 1
-    `,
-    [username, email],
-  );
+  `
+  SELECT id
+  FROM users
+  WHERE username = $1 OR LOWER(email) = $2
+  LIMIT 1
+  `,
+  [username, email],
+);
 
   if (existingUser.rows.length > 0) {
     throw new Error("Username or email already exists");
@@ -54,7 +54,7 @@ export async function loginUser(
     `
     SELECT id, username, email, password_hash, state
     FROM users
-    WHERE email = $1
+    WHERE LOWER(email) = $1
     `,
     [email],
   );
@@ -95,7 +95,6 @@ export async function loginUser(
     state: user.state,
   };
 }
-
 export function createToken(userId: number) {
   return jwt.sign(
     { userId },

@@ -10,6 +10,8 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE UNIQUE INDEX users_email_lower_unique
+ON users (LOWER(email));
 CREATE TABLE workspaces (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,

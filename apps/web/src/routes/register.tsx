@@ -39,6 +39,7 @@ function RegisterPage() {
               username: value.username,
               email: value.email,
               password: value.password,
+              confirmPassword: value.confirmPassword,
             }),
           },
         );

@@ -1,4 +1,10 @@
 import { z } from "zod";
+function getUtf8ByteLength(value: string) {
+  return encodeURIComponent(value).replace(
+    /%[0-9A-F]{2}/g,
+    "x",
+  ).length;
+}
 
 export const registerUserSchema = z
   .object({
@@ -17,7 +23,11 @@ export const registerUserSchema = z
     password: z
       .string()
       .min(1, "Password is required")
-      .min(8, "Password must be at least 8 characters"),
+      .min(8, "Password must be at least 8 characters")
+      .refine(
+        (value) => getUtf8ByteLength(value) <= 72,
+        "Password must be at most 72 UTF-8 bytes",
+      ),
 
     confirmPassword: z
       .string()

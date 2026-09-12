@@ -1,8 +1,12 @@
-import type { NextFunction, Request, Response } from "express";
+import type {
+  NextFunction,
+  Request,
+  Response,
+} from "express";
 
-import { verifyToken } from "../services/auth.service.js";
+import { getCurrentUser } from "../services/auth.service.js";
 
-export function authMiddleware(
+export async function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -16,7 +20,7 @@ export function authMiddleware(
       });
     }
 
-    verifyToken(token);
+    await getCurrentUser(token);
 
     next();
   } catch (error) {

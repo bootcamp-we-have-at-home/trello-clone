@@ -5,6 +5,7 @@ const windowMs = 15 * 60 * 1000;
 export const loginIpRateLimit = rateLimit({
   windowMs,
   limit: 20,
+  skipSuccessfulRequests: true,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   message: {
@@ -16,6 +17,7 @@ export const loginIpRateLimit = rateLimit({
 export const loginAccountRateLimit = rateLimit({
   windowMs,
   limit: 5,
+  skipSuccessfulRequests: true,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   keyGenerator: (req) => {

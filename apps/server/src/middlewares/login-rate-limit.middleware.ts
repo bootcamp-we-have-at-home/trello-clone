@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
-import { rateLimit } from "express-rate-limit";
-
+import { rateLimit,ipKeyGenerator,} from "express-rate-limit";
 const windowMs = 15 * 60 * 1000;
 const requestWasSuccessful = (
   _req: Request,
@@ -33,7 +32,7 @@ export const loginAccountRateLimit = rateLimit({
         ? req.body.email.trim().toLowerCase()
         : "unknown";
 
-    return `${req.ip}:${email}`;
+    return `${ipKeyGenerator(req.ip ?? "unknown")}:${email}`;
   },
   message: {
     message:

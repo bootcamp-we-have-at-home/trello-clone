@@ -6,6 +6,9 @@ import type { RegisterUserInput } from "@trello-clone/schemas";
 
 const JWT_SECRET = env.JWT_SECRET;
 
+const DUMMY_PASSWORD_HASH =
+  "$2b$12$7Fe5u/tuC3XbuJ6tJxyRV.sawRFoq2FgUYmDBW.hHVCxjUM8Ho6iW";
+
 export const registerUser = async ({
   username,
   email,
@@ -52,16 +55,29 @@ export async function loginUser(
     SELECT id, username, email, password_hash, state
     FROM users
     WHERE email = $1
-      AND state = 'active'
     `,
     [email],
   );
 
   if (result.rows.length === 0) {
+    await bcrypt.compare(
+      password,
+      DUMMY_PASSWORD_HASH,
+    );
+
     throw new Error("Invalid email or password");
   }
 
   const user = result.rows[0];
+
+  if (user.state !== "active") {
+    await bcrypt.compare(
+      password,
+      DUMMY_PASSWORD_HASH,
+    );
+
+    throw new Error("Invalid email or password");
+  }
 
   const passwordMatch = await bcrypt.compare(
     password,

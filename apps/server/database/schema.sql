@@ -72,7 +72,7 @@ CREATE TABLE cards (
 
     FOREIGN KEY (board_id)
         REFERENCES boards(id)
-        ON DELETE CASCADE,
+        ON DELETE CASCADE
 );
 CREATE TABLE comments (
     id SERIAL PRIMARY KEY,
@@ -103,27 +103,28 @@ CREATE TABLE card_labels (
     card_id INT,
     label_id INT,
 
-    PRIMARY KEY(card_id, label_id),
+    PRIMARY KEY (card_id, label_id),
 
-    FOREIGN KEY(card_id)
+    FOREIGN KEY (card_id)
         REFERENCES cards(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY(label_id)
+    FOREIGN KEY (label_id)
         REFERENCES labels(id)
         ON DELETE CASCADE
 );
-CREATE TABLE CardAssignee(
+
+CREATE TABLE CardAssignee (
     card_id INT,
     user_id INT,
 
-    PRIMARY KEY(card_id, user_id),
+    PRIMARY KEY (card_id, user_id),
 
-    FOREIGN KEY(card_id)
+    FOREIGN KEY (card_id)
         REFERENCES cards(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY(user_id)
+    FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE RESTRICT
 );
@@ -134,7 +135,7 @@ CREATE TABLE attachments (
     file_url TEXT NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY(card_id)
+    FOREIGN KEY (card_id)
         REFERENCES cards(id)
         ON DELETE CASCADE
 );
@@ -145,11 +146,11 @@ CREATE TABLE activities (
     action TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY(card_id)
+    FOREIGN KEY (card_id)
         REFERENCES cards(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY(user_id)
+    FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE RESTRICT
 );

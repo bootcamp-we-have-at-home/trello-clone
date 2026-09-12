@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
+
+import { registerUserSchema } from "@trello-clone/schemas";
+
 import { registerUser } from "../services/auth.service.js";
-import {
-  registerUserSchema,
-} from "@trello-clone/schemas";
+
 export const registerController = async (
   req: Request,
   res: Response,
@@ -24,7 +25,27 @@ export const registerController = async (
       user,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Register error:", error);
+
+    if (
+      error instanceof Error &&
+      error.message === "Username or email already exists"
+    ) {
+      return res.status(409).json({
+        message: "Username or email already exists",
+      });
+    }
+
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
+      return res.status(409).json({
+        message: "Username or email already exists",
+      });
+    }
 
     return res.status(500).json({
       message: "Internal server error",

@@ -79,10 +79,19 @@ export async function loginController(
       user,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
 
-    return res.status(401).json({
-      message: "Invalid email or password",
+    if (
+      error instanceof Error &&
+      error.message === "Invalid email or password"
+    ) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal server error",
     });
   }
 }

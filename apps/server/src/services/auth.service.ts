@@ -1,11 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
+import { env } from "@trello-clone/env/server";
 import { db } from "@trello-clone/db";
 import type { RegisterUserInput } from "@trello-clone/schemas";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "trello-clone-development-secret";
+const JWT_SECRET = env.JWT_SECRET;
 
 export const registerUser = async ({
   username,

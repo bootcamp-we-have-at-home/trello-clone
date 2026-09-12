@@ -7,6 +7,7 @@ export const env = createEnv({
     PORT: z.coerce.number().default(5000),
     CORS_ORIGIN: z.url(),
     DATABASE_URL: z.string().min(1),
+    JWT_SECRET: z.string().min(32),
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),
@@ -16,6 +17,7 @@ export const env = createEnv({
     PORT: process.env.PORT,
     CORS_ORIGIN: process.env.CORS_ORIGIN,
     DATABASE_URL: process.env.DATABASE_URL,
+    JWT_SECRET: process.env.JWT_SECRET,
     NODE_ENV: process.env.NODE_ENV,
   },
 

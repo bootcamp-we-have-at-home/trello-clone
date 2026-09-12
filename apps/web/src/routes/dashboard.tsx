@@ -21,7 +21,7 @@ function DashboardPage() {
     const checkAuthentication = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/auth/me",
+          `${import.meta.env.VITE_SERVER_URL}/api/auth/me`,
           {
             credentials: "include",
           },

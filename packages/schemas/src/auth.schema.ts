@@ -11,7 +11,8 @@ export const registerUserSchema = z
     email: z
       .string()
       .min(1, "Email is required")
-      .email("Please enter a valid email"),
+      .email("Please enter a valid email")
+      .max(255, "Email must be at most 255 characters"),
 
     password: z
       .string()

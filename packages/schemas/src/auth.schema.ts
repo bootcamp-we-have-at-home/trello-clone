@@ -107,12 +107,7 @@ export const loginSchema = z.object({
 
   password: z
     .string()
-    .min(1, "Password is required")
-    .refine(
-      (value) =>
-        getUtf8ByteLength(value) <= 72,
-      "Password must be at most 72 UTF-8 bytes",
-    ),
+    .min(1, "Password is required"),
 });
 export type RegisterUserInput = z.infer<
   typeof registerUserSchema

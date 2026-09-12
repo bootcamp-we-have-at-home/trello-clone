@@ -10,6 +10,10 @@ import {
   createToken,
   getCurrentUser,
 } from "../services/auth.service.js";
+import {
+  JsonWebTokenError,
+  TokenExpiredError,
+} from "jsonwebtoken";
 const isProduction = env.NODE_ENV === "production";
 
 export const registerController = async (
@@ -117,16 +121,17 @@ export async function meController(
       user,
     });
   } catch (error) {
-    console.error("Get current user error:", error);
+    console.error(
+      "Get current user error:",
+      error,
+    );
 
     if (
-      error instanceof Error &&
-      (
-        error.message === "Invalid token" ||
-        error.message === "jwt malformed" ||
-        error.message === "jwt expired" ||
-        error.message === "User not found or inactive"
-      )
+      error instanceof JsonWebTokenError ||
+      error instanceof TokenExpiredError ||
+      (error instanceof Error &&
+        error.message ===
+          "User not found or inactive")
     ) {
       return res.status(401).json({
         message: "Invalid or expired token",

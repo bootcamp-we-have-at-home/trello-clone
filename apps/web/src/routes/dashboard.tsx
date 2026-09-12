@@ -16,35 +16,53 @@ function DashboardPage() {
   } | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
+        const serverUrl =
+          import.meta.env.VITE_SERVER_URL.replace(
+            /\/+$/,
+            "",
+          );
         const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/api/auth/me`,
+          `${serverUrl}/api/auth/me`,
           {
             credentials: "include",
           },
         );
 
-        if (!response.ok) {
+        if (response.status === 401) {
           navigate({ to: "/login" });
           return;
         }
-
+        if (!response.ok) {
+          setError(
+            "Unable to verify authentication. Please try again later.",
+          );
+          return;
+        }
         const data = await response.json();
 
         setUser(data.user);
       } catch (error) {
-        console.error("Authentication check failed:", error);
+        console.error(
+          "Authentication check failed:",
+          error,
+        );
 
-        navigate({ to: "/login" });
+        setError(
+          "Unable to connect to server. Please try again later.",
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuthentication();
+    void checkAuthentication();
   }, [navigate]);
 
   if (loading) {
@@ -56,7 +74,15 @@ function DashboardPage() {
       </div>
     );
   }
-
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 dark:bg-slate-950">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-6 py-4 text-center text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400">
+          {error}
+        </div>
+      </div>
+    );
+  }
   if (!user) {
     return null;
   }

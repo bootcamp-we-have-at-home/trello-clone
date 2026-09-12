@@ -4,7 +4,7 @@ import { env } from "@trello-clone/env/server";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.js";
 const app: express.Application = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", false);
 
 app.use(
   cors({

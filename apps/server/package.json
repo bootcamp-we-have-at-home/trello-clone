@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@trello-clone/env": "workspace:*",
+    "@trello-clone/schemas": "workspace:*",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "catalog:",
     "express": "^5.2.1",

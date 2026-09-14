@@ -46,7 +46,10 @@ export const registerUserSchema = z
     username: z
       .string()
       .min(1, "Username is required")
-      .min(3, "Username must be at least 3 characters")
+      .min(
+        3,
+        "Username must be at least 3 characters",
+      )
       .max(
         50,
         "Username must be at most 50 characters",
@@ -54,14 +57,13 @@ export const registerUserSchema = z
 
     email: z
       .string()
+      .trim()
+      .toLowerCase()
       .min(1, "Email is required")
       .email("Please enter a valid email")
       .max(
         255,
         "Email must be at most 255 characters",
-      )
-      .transform((value) =>
-        value.trim().toLowerCase(),
       ),
 
     password: z
@@ -95,14 +97,13 @@ export const registerUserSchema = z
 export const loginSchema = z.object({
   email: z
     .string()
+    .trim()
+    .toLowerCase()
     .min(1, "Email is required")
     .email("Please enter a valid email")
     .max(
       255,
       "Email must be at most 255 characters",
-    )
-    .transform((value) =>
-      value.trim().toLowerCase(),
     ),
 
   password: z

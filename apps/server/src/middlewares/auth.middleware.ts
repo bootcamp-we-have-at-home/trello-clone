@@ -23,7 +23,9 @@ export async function authMiddleware(
       });
     }
 
-    await getCurrentUser(token);
+    const user = await getCurrentUser(token);
+
+    req.user = user;
 
     next();
   } catch (error) {

@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { env } from "@trello-clone/env/server";
-
+import authRoutes from "./routes/auth.js";
 const app: express.Application = express();
 
 app.use(
@@ -19,5 +19,5 @@ app.get("/", (_req, res) => {
     message: "Trello Clone API",
   });
 });
-
+app.use("/api/auth", authRoutes);
 export default app;

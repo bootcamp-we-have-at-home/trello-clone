@@ -13,8 +13,10 @@
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@tailwindcss/vite": "^4.3.2",
+    "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-router": "^1.170.17",
     "@trello-clone/env": "workspace:*",
+    "@trello-clone/schemas": "workspace:*",
     "@trello-clone/ui": "workspace:*",
     "dotenv": "catalog:",
     "lucide-react": "catalog:",

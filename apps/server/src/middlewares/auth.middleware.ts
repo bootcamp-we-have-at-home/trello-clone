@@ -32,7 +32,8 @@ export async function authMiddleware(
       error instanceof jwt.JsonWebTokenError ||
       error instanceof jwt.TokenExpiredError ||
       (error instanceof Error &&
-        error.message === "User not found or inactive")
+        error.message ===
+          "User not found or inactive")
     ) {
       return res.status(401).json({
         message: "Invalid or expired token",

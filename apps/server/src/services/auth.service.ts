@@ -112,7 +112,7 @@ export function verifyToken(token: string) {
   ) as jwt.JwtPayload;
 
   if (typeof payload.userId !== "number") {
-    throw new Error("Invalid token");
+    throw new jwt.JsonWebTokenError("Invalid token");
   }
 
   return payload.userId;

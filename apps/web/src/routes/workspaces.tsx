@@ -155,6 +155,60 @@ function WorkspacesPage() {
       setCreating(false);
     }
   };
+  const handleDeleteWorkspace = async (workspaceId: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this workspace?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const serverUrl =
+        import.meta.env.VITE_SERVER_URL.replace(
+          /\/+$/,
+          "",
+        );
+
+      const response = await fetch(
+        `${serverUrl}/api/workspaces/${workspaceId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        navigate({ to: "/login" });
+        return;
+      }
+
+      if (!response.ok) {
+        window.alert(
+          data.message || "Failed to delete workspace.",
+        );
+        return;
+      }
+
+      setWorkspaces((currentWorkspaces) =>
+        currentWorkspaces.filter(
+          (workspace) => workspace.id !== workspaceId,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Deleting workspace failed:",
+        error,
+      );
+
+      window.alert(
+        "Unable to connect to server. Please try again later.",
+      );
+    }
+  };
 
   if (loading) {
     return (
@@ -275,6 +329,15 @@ function WorkspacesPage() {
                 <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
                   Role: {workspace.role}
                 </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleDeleteWorkspace(workspace.id)
+                  }
+                  className="mt-4 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                >
+                  Delete Workspace
+                </button>
               </div>
             ))}
           </div>

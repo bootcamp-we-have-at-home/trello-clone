@@ -61,3 +61,19 @@ export const getUserWorkspaces = async (userId: number) => {
 
   return result.rows;
 };
+export const deleteWorkspace = async (
+  workspaceId: number,
+  userId: number,
+) => {
+  const result = await db.query(
+    `
+    DELETE FROM workspaces
+    WHERE id = $1
+      AND owner_id = $2
+    RETURNING id, name
+    `,
+    [workspaceId, userId],
+  );
+
+  return result.rows[0] ?? null;
+};

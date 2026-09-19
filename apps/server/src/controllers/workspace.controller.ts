@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
 import { createWorkspaceSchema } from "../validation/workspace.js";
-import { createWorkspace } from "../services/workspace.service.js";
+import {
+  createWorkspace,
+  getUserWorkspaces,
+} from "../services/workspace.service.js";
 
 export const createWorkspaceController = async (
   req: Request,
@@ -33,6 +36,30 @@ export const createWorkspaceController = async (
 
     return res.status(500).json({
       message: "Failed to create workspace",
+    });
+  }
+};
+export const getUserWorkspacesController = async (
+  req: Request,
+  res: Response,
+) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required",
+    });
+  }
+
+  try {
+    const workspaces = await getUserWorkspaces(req.user.id);
+
+    return res.status(200).json({
+      workspaces,
+    });
+  } catch (error) {
+    console.error("Get workspaces error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch workspaces",
     });
   }
 };

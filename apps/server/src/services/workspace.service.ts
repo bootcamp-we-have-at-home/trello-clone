@@ -39,3 +39,25 @@ export const createWorkspace = async (
     client.release();
   }
 };
+export const getUserWorkspaces = async (userId: number) => {
+  const result = await db.query(
+    `
+    SELECT
+      w.id,
+      w.name,
+      w.description,
+      w.owner_id,
+      w.created_at,
+      w.updated_at,
+      wm.role
+    FROM workspaces w
+    INNER JOIN workspace_members wm
+      ON wm.workspace_id = w.id
+    WHERE wm.user_id = $1
+    ORDER BY w.created_at DESC
+    `,
+    [userId],
+  );
+
+  return result.rows;
+};

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { createWorkspaceSchema } from "@trello-clone/schemas";
 
 export const Route = createFileRoute("/workspaces")({
   component: WorkspacesPage,
@@ -84,8 +85,17 @@ function WorkspacesPage() {
     setCreateError(null);
     setValidationErrors({});
 
-    if (!name.trim()) {
-      setCreateError("Workspace name is required.");
+    const validationResult = createWorkspaceSchema.safeParse({
+      name: name.trim(),
+      description: description.trim() || undefined,
+    });
+
+    if (!validationResult.success) {
+      setCreateError(
+        validationResult.error.issues[0]?.message ??
+          "Invalid workspace data.",
+      );
+
       return;
     }
 
@@ -106,10 +116,7 @@ function WorkspacesPage() {
             "Content-Type": "application/json",
           },
           credentials: "include",
-          body: JSON.stringify({
-            name: name.trim(),
-            description: description.trim() || undefined,
-          }),
+          body: JSON.stringify(validationResult.data),
         },
       );
 

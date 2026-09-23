@@ -1,8 +1,6 @@
-import { z } from "zod";
-
-export const createWorkspaceSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().optional(),
-});
-
-export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>;
+export {
+  createWorkspaceSchema,
+} from "@trello-clone/schemas";
+export type {
+  CreateWorkspaceInput,
+} from "@trello-clone/schemas";

@@ -34,7 +34,25 @@ export const registerController = async (
       user,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Register error:", error);
+    if (
+      error instanceof Error &&
+      error.message === "Username or email already exists"
+    ) {
+      return res.status(409).json({
+        message: error.message,
+      });
+    }
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
+      return res.status(409).json({
+        message: "Username or email already exists",
+      });
+    }
 
     return res.status(500).json({
       message: "Internal server error",

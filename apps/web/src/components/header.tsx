@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router";
 
 import { ModeToggle } from "./mode-toggle";
 const links = [
-  { to: "/", label: "Home" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/workspaces", label: "Workspaces" },
+  { to: "/", label: "Home", shortLabel: "H" },
+  { to: "/dashboard", label: "Dashboard", shortLabel: "D" },
+  { to: "/workspaces", label: "Workspaces", shortLabel: "W" },
 ] as const;
 
 export default function Header() {
@@ -21,20 +21,21 @@ export default function Header() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-900">
-          {links.map(({ to, label }) => (
+          {links.map(({ to, label, shortLabel }) => (
             <Link
               key={to}
               to={to}
               activeProps={{
                 className:
-                  "rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white",
+                  "rounded-md bg-white px-2 py-2 text-sm font-medium text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white sm:px-3",
               }}
               inactiveProps={{
                 className:
-                  "rounded-md px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white",
+                  "rounded-md px-2 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white sm:px-3",
               }}
             >
-              {label}
+              <span className="sm:hidden">{shortLabel}</span>
+              <span className="hidden sm:inline">{label}</span>
             </Link>
           ))}
         </nav>

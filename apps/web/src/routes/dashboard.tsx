@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { requireAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard")({
+  beforeLoad: requireAuth,
   component: DashboardPage,
 });
-
 function DashboardPage() {
   const navigate = useNavigate();
 

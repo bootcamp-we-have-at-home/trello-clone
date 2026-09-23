@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { createWorkspaceSchema } from "@trello-clone/schemas";
-
+import { requireAuth } from "@/lib/auth";
 type Workspace = {
   id: number;
   name: string;
@@ -13,6 +13,7 @@ type Workspace = {
   role: "admin" | "member";
 };
 export const Route = createFileRoute("/workspaces")({
+  beforeLoad: requireAuth,
   component: WorkspacesPage,
 });
 

@@ -25,6 +25,7 @@ export default function Header() {
             <Link
               key={to}
               to={to}
+              activeOptions={{ exact: to === "/" }}
               activeProps={{
                 className:
                   "rounded-md bg-white px-2 py-2 text-sm font-medium text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white sm:px-3",

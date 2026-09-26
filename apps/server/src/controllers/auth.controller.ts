@@ -10,10 +10,7 @@ import {
   createToken,
   getCurrentUser,
 } from "../services/auth.service.js";
-import {
-  JsonWebTokenError,
-  TokenExpiredError,
-} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 const isProduction = env.NODE_ENV === "production";
 
 export const registerController = async (
@@ -37,7 +34,25 @@ export const registerController = async (
       user,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Register error:", error);
+    if (
+      error instanceof Error &&
+      error.message === "Username or email already exists"
+    ) {
+      return res.status(409).json({
+        message: error.message,
+      });
+    }
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
+      return res.status(409).json({
+        message: "Username or email already exists",
+      });
+    }
 
     return res.status(500).json({
       message: "Internal server error",
@@ -126,13 +141,12 @@ export async function meController(
       error,
     );
 
-    if (
-      error instanceof JsonWebTokenError ||
-      error instanceof TokenExpiredError ||
-      (error instanceof Error &&
-        error.message ===
-          "User not found or inactive")
-    ) {
+   if (
+  error instanceof jwt.JsonWebTokenError ||
+  error instanceof jwt.TokenExpiredError ||
+  (error instanceof Error &&
+    error.message === "User not found or inactive")
+) {
       return res.status(401).json({
         message: "Invalid or expired token",
       });

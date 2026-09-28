@@ -1,5 +1,5 @@
 import { db } from "@trello-clone/db";
-import type { CreateBoardInput } from "../validation/board.js";
+import type { CreateBoardInput,UpdateBoardInput, } from "../validation/board.js";
 
 export const createBoard = async (
   userId: number,
@@ -92,6 +92,34 @@ export const getBoard = async (
       AND wm.user_id = $2
     `,
     [boardId, userId],
+  );
+
+  return result.rows[0] ?? null;
+};
+export const updateBoard = async (
+  userId: number,
+  boardId: number,
+  { title }: UpdateBoardInput,
+) => {
+  const result = await db.query(
+    `
+    UPDATE boards b
+    SET
+      title = $1,
+      updated_at = CURRENT_TIMESTAMP
+    FROM workspace_members wm
+    WHERE b.id = $2
+      AND wm.workspace_id = b.workspace_id
+      AND wm.user_id = $3
+    RETURNING
+      b.id,
+      b.title,
+      b.workspace_id,
+      b.created_by,
+      b.created_at,
+      b.updated_at
+    `,
+    [title, boardId, userId],
   );
 
   return result.rows[0] ?? null;

@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { createBoardSchema } from "../validation/board.js";
-import { createBoard } from "../services/board.service.js";
-
+import { createBoard, getWorkspaceBoards  } from "../services/board.service.js";
 export const createBoardController = async (
   req: Request,
   res: Response,
@@ -39,6 +38,47 @@ export const createBoardController = async (
 
     return res.status(500).json({
       message: "Failed to create board",
+    });
+  }
+};
+export const getWorkspaceBoardsController = async (
+  req: Request,
+  res: Response,
+) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required",
+    });
+  }
+
+  const workspaceId = Number(req.query.workspaceId);
+
+  if (!Number.isInteger(workspaceId) || workspaceId <= 0) {
+    return res.status(400).json({
+      message: "Invalid workspace ID",
+    });
+  }
+
+  try {
+    const boards = await getWorkspaceBoards(
+      req.user.id,
+      workspaceId,
+    );
+
+    if (!boards) {
+      return res.status(403).json({
+        message: "You are not a member of this workspace",
+      });
+    }
+
+    return res.status(200).json({
+      boards,
+    });
+  } catch (error) {
+    console.error("Get workspace boards error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch workspace boards",
     });
   }
 };

@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { createBoardSchema } from "../validation/board.js";
-import { createBoard, getWorkspaceBoards  } from "../services/board.service.js";
+import { createBoard, getWorkspaceBoards,getBoard } from "../services/board.service.js";
 export const createBoardController = async (
   req: Request,
   res: Response,
@@ -79,6 +79,44 @@ export const getWorkspaceBoardsController = async (
 
     return res.status(500).json({
       message: "Failed to fetch workspace boards",
+    });
+  }
+};
+export const getBoardController = async (
+  req: Request,
+  res: Response,
+) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required",
+    });
+  }
+
+  const boardId = Number(req.params.id);
+
+  if (!Number.isInteger(boardId) || boardId <= 0) {
+    return res.status(400).json({
+      message: "Invalid board ID",
+    });
+  }
+
+  try {
+    const board = await getBoard(req.user.id, boardId);
+
+    if (!board) {
+      return res.status(404).json({
+        message: "Board not found",
+      });
+    }
+
+    return res.status(200).json({
+      board,
+    });
+  } catch (error) {
+    console.error("Get board error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch board",
     });
   }
 };

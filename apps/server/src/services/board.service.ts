@@ -72,3 +72,27 @@ export const getWorkspaceBoards = async (
 
   return result.rows;
 };
+export const getBoard = async (
+  userId: number,
+  boardId: number,
+) => {
+  const result = await db.query(
+    `
+    SELECT
+      b.id,
+      b.title,
+      b.workspace_id,
+      b.created_by,
+      b.created_at,
+      b.updated_at
+    FROM boards b
+    INNER JOIN workspace_members wm
+      ON wm.workspace_id = b.workspace_id
+    WHERE b.id = $1
+      AND wm.user_id = $2
+    `,
+    [boardId, userId],
+  );
+
+  return result.rows[0] ?? null;
+};

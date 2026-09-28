@@ -124,3 +124,23 @@ export const updateBoard = async (
 
   return result.rows[0] ?? null;
 };
+export const deleteBoard = async (
+  userId: number,
+  boardId: number,
+) => {
+  const result = await db.query(
+    `
+    DELETE FROM boards b
+    USING workspace_members wm
+    WHERE b.id = $1
+      AND wm.workspace_id = b.workspace_id
+      AND wm.user_id = $2
+    RETURNING
+      b.id,
+      b.title
+    `,
+    [boardId, userId],
+  );
+
+  return result.rows[0] ?? null;
+};

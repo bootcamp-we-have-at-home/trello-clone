@@ -1,6 +1,18 @@
 import type { Request, Response } from "express";
-import { createBoardSchema,updateBoardSchema, } from "../validation/board.js";
-import { createBoard, getWorkspaceBoards,getBoard,updateBoard,deleteBoard} from "../services/board.service.js";
+
+import {
+  createBoardSchema,
+  updateBoardSchema,
+} from "../validation/board.js";
+
+import {
+  createBoard,
+  getWorkspaceBoards,
+  getBoard,
+  updateBoard,
+  deleteBoard,
+} from "../services/board.service.js";
+
 export const createBoardController = async (
   req: Request,
   res: Response,
@@ -21,11 +33,15 @@ export const createBoardController = async (
   }
 
   try {
-    const board = await createBoard(req.user.id, result.data);
+    const board = await createBoard(
+      req.user.id,
+      result.data,
+    );
 
     if (!board) {
       return res.status(403).json({
-        message: "You are not a member of this workspace",
+        message:
+          "You are not a member of this workspace",
       });
     }
 
@@ -41,6 +57,7 @@ export const createBoardController = async (
     });
   }
 };
+
 export const getWorkspaceBoardsController = async (
   req: Request,
   res: Response,
@@ -53,7 +70,10 @@ export const getWorkspaceBoardsController = async (
 
   const workspaceId = Number(req.query.workspaceId);
 
-  if (!Number.isInteger(workspaceId) || workspaceId <= 0) {
+  if (
+    !Number.isInteger(workspaceId) ||
+    workspaceId <= 0
+  ) {
     return res.status(400).json({
       message: "Invalid workspace ID",
     });
@@ -67,7 +87,8 @@ export const getWorkspaceBoardsController = async (
 
     if (!boards) {
       return res.status(403).json({
-        message: "You are not a member of this workspace",
+        message:
+          "You are not a member of this workspace",
       });
     }
 
@@ -75,13 +96,17 @@ export const getWorkspaceBoardsController = async (
       boards,
     });
   } catch (error) {
-    console.error("Get workspace boards error:", error);
+    console.error(
+      "Get workspace boards error:",
+      error,
+    );
 
     return res.status(500).json({
       message: "Failed to fetch workspace boards",
     });
   }
 };
+
 export const getBoardController = async (
   req: Request,
   res: Response,
@@ -94,14 +119,20 @@ export const getBoardController = async (
 
   const boardId = Number(req.params.id);
 
-  if (!Number.isInteger(boardId) || boardId <= 0) {
+  if (
+    !Number.isInteger(boardId) ||
+    boardId <= 0
+  ) {
     return res.status(400).json({
       message: "Invalid board ID",
     });
   }
 
   try {
-    const board = await getBoard(req.user.id, boardId);
+    const board = await getBoard(
+      req.user.id,
+      boardId,
+    );
 
     if (!board) {
       return res.status(404).json({
@@ -120,6 +151,7 @@ export const getBoardController = async (
     });
   }
 };
+
 export const updateBoardController = async (
   req: Request,
   res: Response,
@@ -132,13 +164,18 @@ export const updateBoardController = async (
 
   const boardId = Number(req.params.id);
 
-  if (!Number.isInteger(boardId) || boardId <= 0) {
+  if (
+    !Number.isInteger(boardId) ||
+    boardId <= 0
+  ) {
     return res.status(400).json({
       message: "Invalid board ID",
     });
   }
 
-  const result = updateBoardSchema.safeParse(req.body);
+  const result = updateBoardSchema.safeParse(
+    req.body,
+  );
 
   if (!result.success) {
     return res.status(400).json({
@@ -172,6 +209,7 @@ export const updateBoardController = async (
     });
   }
 };
+
 export const deleteBoardController = async (
   req: Request,
   res: Response,
@@ -184,7 +222,10 @@ export const deleteBoardController = async (
 
   const boardId = Number(req.params.id);
 
-  if (!Number.isInteger(boardId) || boardId <= 0) {
+  if (
+    !Number.isInteger(boardId) ||
+    boardId <= 0
+  ) {
     return res.status(400).json({
       message: "Invalid board ID",
     });

@@ -7,6 +7,6 @@ const router: Router = Router();
 router.post("/", authMiddleware, createBoardController);
 router.get("/", authMiddleware, getWorkspaceBoardsController);
 router.get("/:id", authMiddleware, getBoardController);
-router.put("/:id", authMiddleware, updateBoardController);
+router.patch("/:id", authMiddleware, updateBoardController);
 router.delete("/:id", authMiddleware, deleteBoardController);
 export default router;

@@ -5,12 +5,25 @@ export const createBoardSchema = z.object({
     .string()
     .trim()
     .min(1, "Board title is required")
-    .max(100, "Board title must be at most 100 characters"),
+    .max(
+      100,
+      "Board title must be at most 100 characters",
+    ),
+
+  description: z
+    .string()
+    .trim()
+    .max(
+      1000,
+      "Board description must be at most 1000 characters",
+    ),
 
   workspaceId: z
     .number()
     .int()
-    .positive("Workspace ID must be a positive number"),
+    .positive(
+      "Workspace ID must be a positive number",
+    ),
 });
 
 export const updateBoardSchema = z.object({
@@ -18,9 +31,23 @@ export const updateBoardSchema = z.object({
     .string()
     .trim()
     .min(1, "Board title is required")
-    .max(100, "Board title must be at most 100 characters"),
+    .max(
+      100,
+      "Board title must be at most 100 characters",
+    ),
+
+  description: z
+    .string()
+    .trim()
+    .max(
+      1000,
+      "Board description must be at most 1000 characters",
+    )
+    .nullable(),
 });
 
-export type CreateBoardInput = z.infer<typeof createBoardSchema>;
+export type CreateBoardInput =
+  z.infer<typeof createBoardSchema>;
 
-export type UpdateBoardInput = z.infer<typeof updateBoardSchema>;
+export type UpdateBoardInput =
+  z.infer<typeof updateBoardSchema>;

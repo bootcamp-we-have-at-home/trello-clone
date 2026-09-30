@@ -1,8 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+
 import { createWorkspaceSchema } from "@trello-clone/schemas";
+
 import { requireAuth } from "@/lib/auth";
+
 type Workspace = {
   id: number;
   name: string;
@@ -12,7 +15,8 @@ type Workspace = {
   updated_at: string;
   role: "admin" | "member";
 };
-export const Route = createFileRoute("/workspaces")({
+
+export const Route = createFileRoute("/workspaces/")({
   beforeLoad: requireAuth,
   component: WorkspacesPage,
 });
@@ -24,13 +28,14 @@ function WorkspacesPage() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(
     null,
   );
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-
   const [creating, setCreating] = useState(false);
+
   const [createError, setCreateError] = useState<string | null>(
     null,
   );
@@ -42,18 +47,25 @@ function WorkspacesPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const serverUrl =
           import.meta.env.VITE_SERVER_URL.replace(/\/+$/, "");
 
-        const [userResponse, workspaceResponse] =
-          await Promise.all([
-            fetch(`${serverUrl}/api/auth/me`, {
-              credentials: "include",
-            }),
-            fetch(`${serverUrl}/api/workspaces`, {
-              credentials: "include",
-            }),
-          ]);
+        const userResponse = await fetch(
+          `${serverUrl}/api/auth/me`,
+          {
+            credentials: "include",
+          },
+        );
+
+        const workspaceResponse = await fetch(
+          `${serverUrl}/api/workspaces`,
+          {
+            credentials: "include",
+          },
+        );
 
         if (
           userResponse.status === 401 ||
@@ -83,7 +95,10 @@ function WorkspacesPage() {
         setCurrentUserId(userData.user.id);
         setWorkspaces(workspaceData.workspaces);
       } catch (error) {
-        console.error("Fetching workspace data failed:", error);
+        console.error(
+          "Fetching workspace data failed:",
+          error,
+        );
 
         setError(
           "Unable to connect to server. Please try again later.",
@@ -346,13 +361,15 @@ function WorkspacesPage() {
             </div>
           )}
 
-          {!loading && !error && workspaces.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-slate-600 dark:text-slate-400">
-                You do not have any workspaces yet.
-              </p>
-            </div>
-          )}
+          {!loading &&
+            !error &&
+            workspaces.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+                <p className="text-slate-600 dark:text-slate-400">
+                  You do not have any workspaces yet.
+                </p>
+              </div>
+            )}
 
           {!loading &&
             !error &&
@@ -361,9 +378,22 @@ function WorkspacesPage() {
                 {workspaces.map((workspace, index) => (
                   <article
                     key={workspace.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                   >
-                    <div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate({
+                          to: "/workspaces/$workspaceId",
+                          params: {
+                            workspaceId: String(
+                              workspace.id,
+                            ),
+                          },
+                        })
+                      }
+                      className="w-full text-left"
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                           {workspace.name}
@@ -378,7 +408,7 @@ function WorkspacesPage() {
                         {workspace.description ||
                           "No description provided."}
                       </p>
-                    </div>
+                    </button>
 
                     <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
                       <span className="text-xs text-slate-400">

@@ -55,7 +55,8 @@ export const Route = createFileRoute(
 function WorkspaceDetailsPage() {
   const navigate = useNavigate();
 
-  const { workspaceId } = Route.useParams();
+  const { workspaceId } =
+    Route.useParams();
 
   const [workspace, setWorkspace] =
     useState<Workspace | null>(null);
@@ -85,6 +86,9 @@ function WorkspaceDetailsPage() {
    * Fetch workspace and boards
    */
   useEffect(() => {
+    const controller =
+      new AbortController();
+
     const fetchWorkspaceData =
       async (): Promise<void> => {
         try {
@@ -104,12 +108,14 @@ function WorkspaceDetailsPage() {
           ] = await Promise.all([
             fetch(`${serverUrl}/api/auth/me`, {
               credentials: "include",
+              signal: controller.signal,
             }),
 
             fetch(
               `${serverUrl}/api/workspaces/${workspaceId}`,
               {
                 credentials: "include",
+                signal: controller.signal,
               },
             ),
 
@@ -117,6 +123,7 @@ function WorkspaceDetailsPage() {
               `${serverUrl}/api/boards?workspaceId=${workspaceId}`,
               {
                 credentials: "include",
+                signal: controller.signal,
               },
             ),
           ]);
@@ -163,26 +170,43 @@ function WorkspaceDetailsPage() {
           const boardsData =
             (await boardsResponse.json()) as BoardsResponse;
 
+          if (controller.signal.aborted) {
+            return;
+          }
+
           setWorkspace(
             workspaceData.workspace,
           );
 
           setBoards(boardsData.boards);
-        } catch (error: unknown) {
+        } catch (fetchError: unknown) {
+          if (
+            fetchError instanceof DOMException &&
+            fetchError.name === "AbortError"
+          ) {
+            return;
+          }
+
           console.error(
             "Fetching workspace data failed:",
-            error,
+            fetchError,
           );
 
           setError(
             "Unable to connect to server. Please try again later.",
           );
         } finally {
-          setLoading(false);
+          if (!controller.signal.aborted) {
+            setLoading(false);
+          }
         }
       };
 
     void fetchWorkspaceData();
+
+    return () => {
+      controller.abort();
+    };
   }, [navigate, workspaceId]);
 
   /**
@@ -194,7 +218,7 @@ function WorkspaceDetailsPage() {
     ): void => {
       const customEvent =
         event as CustomEvent<Board>;
-      
+
       const updatedBoard =
         customEvent.detail;
 
@@ -289,10 +313,8 @@ function WorkspaceDetailsPage() {
     const validationResult =
       createBoardSchema.safeParse({
         title: boardTitle.trim(),
-
         description:
           boardDescription.trim(),
-
         workspaceId: Number(workspaceId),
       });
 
@@ -318,13 +340,10 @@ function WorkspaceDetailsPage() {
         `${serverUrl}/api/boards`,
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
           credentials: "include",
-
           body: JSON.stringify(
             validationResult.data,
           ),
@@ -383,32 +402,33 @@ function WorkspaceDetailsPage() {
   /**
    * Open Board Details
    */
-const handleOpenBoard = async (
-  event: MouseEvent<HTMLButtonElement>,
-  boardId: number,
-): Promise<void> => {
-  event.preventDefault();
+  const handleOpenBoard = async (
+    event: MouseEvent<HTMLButtonElement>,
+    boardId: number,
+  ): Promise<void> => {
+    event.preventDefault();
 
-  try {
-    sessionStorage.setItem(
-      `board-opened-${boardId}`,
-      "true",
-    );
+    try {
+      sessionStorage.setItem(
+        `board-opened-${boardId}`,
+        "true",
+      );
 
-    await navigate({
-      to: "/workspaces/$workspaceId/boards/$boardId",
-      params: {
-        workspaceId,
-        boardId: String(boardId),
-      },
-    });
-  } catch (error: unknown) {
-    console.error(
-      "NAVIGATION FAILED:",
-      error,
-    );
-  }
-};
+      await navigate({
+        to: "/workspaces/$workspaceId/boards/$boardId",
+        params: {
+          workspaceId,
+          boardId: String(boardId),
+        },
+      });
+    } catch (error: unknown) {
+      console.error(
+        "NAVIGATION FAILED:",
+        error,
+      );
+    }
+  };
+
   /**
    * Loading
    */

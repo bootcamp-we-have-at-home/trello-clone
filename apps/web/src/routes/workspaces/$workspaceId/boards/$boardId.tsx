@@ -741,12 +741,6 @@ function BoardDetailsPage(): ReactElement | null {
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
                   State
                 </p>
-
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-400/10 px-3 py-1.5 text-sm font-medium text-emerald-300">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-
-                  {board.state}
-                </div>
               </div>
 
               <div className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/[0.08]">

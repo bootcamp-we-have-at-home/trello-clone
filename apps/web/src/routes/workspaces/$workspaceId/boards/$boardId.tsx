@@ -72,35 +72,13 @@ function BoardDetailsPage(): ReactElement | null {
       description: "",
     });
 
-  useEffect(() => {
-    const openedBoardDetails =
-      sessionStorage.getItem(
-        "opened-board-details",
-      );
-
-    if (openedBoardDetails !== "true") {
-      void navigate({
-        to: "/workspaces/$workspaceId",
-        params: {
-          workspaceId,
-        },
-        replace: true,
-      });
-
-      return;
-    }
-
-    sessionStorage.removeItem(
-      "opened-board-details",
-    );
-
-    setCanShowBoard(true);
-  }, [navigate, workspaceId]);
-
-  useEffect(() => {
-    if (canShowBoard !== true) {
-      return;
-    }
+    useEffect(() => {
+      setCanShowBoard(true);
+    }, []);
+      useEffect(() => {
+        if (canShowBoard !== true) {
+          return;
+        }
 
     const fetchBoard =
       async (): Promise<void> => {

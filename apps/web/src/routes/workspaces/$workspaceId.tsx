@@ -194,7 +194,7 @@ function WorkspaceDetailsPage() {
     ): void => {
       const customEvent =
         event as CustomEvent<Board>;
-
+      
       const updatedBoard =
         customEvent.detail;
 
@@ -383,34 +383,32 @@ function WorkspaceDetailsPage() {
   /**
    * Open Board Details
    */
-  const handleOpenBoard = async (
-    event: MouseEvent<HTMLButtonElement>,
-    boardId: number,
-  ): Promise<void> => {
-    event.preventDefault();
+const handleOpenBoard = async (
+  event: MouseEvent<HTMLButtonElement>,
+  boardId: number,
+): Promise<void> => {
+  event.preventDefault();
 
-    try {
-      sessionStorage.setItem(
-        "opened-board-details",
-        "true",
-      );
+  try {
+    sessionStorage.setItem(
+      `board-opened-${boardId}`,
+      "true",
+    );
 
-      await navigate({
-        to: "/workspaces/$workspaceId/boards/$boardId",
-
-        params: {
-          workspaceId,
-          boardId: String(boardId),
-        },
-      });
-    } catch (error: unknown) {
-      console.error(
-        "NAVIGATION FAILED:",
-        error,
-      );
-    }
-  };
-
+    await navigate({
+      to: "/workspaces/$workspaceId/boards/$boardId",
+      params: {
+        workspaceId,
+        boardId: String(boardId),
+      },
+    });
+  } catch (error: unknown) {
+    console.error(
+      "NAVIGATION FAILED:",
+      error,
+    );
+  }
+};
   /**
    * Loading
    */

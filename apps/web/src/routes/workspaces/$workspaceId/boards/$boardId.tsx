@@ -73,8 +73,27 @@ function BoardDetailsPage(): ReactElement | null {
     });
 
     useEffect(() => {
+      const openedFromWorkspace = sessionStorage.getItem(
+        `board-opened-${boardId}`,
+      );
+
+      if (!openedFromWorkspace) {
+        void navigate({
+          to: "/workspaces/$workspaceId",
+          params: {
+            workspaceId,
+          },
+          replace: true,
+        });
+
+        return;
+      }
+      sessionStorage.removeItem(
+        `board-opened-${boardId}`,
+      );
+
       setCanShowBoard(true);
-    }, []);
+    }, [boardId, navigate, workspaceId]);
       useEffect(() => {
         if (canShowBoard !== true) {
           return;

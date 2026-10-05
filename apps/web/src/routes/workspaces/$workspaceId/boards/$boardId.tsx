@@ -11,7 +11,6 @@ import type {
 } from "react";
 
 import { updateBoardSchema } from "@trello-clone/schemas";
-
 import type { UpdateBoardInput } from "@trello-clone/schemas";
 
 type Board = {
@@ -19,7 +18,6 @@ type Board = {
   workspace_id: number;
   title: string;
   description: string | null;
-  state: string;
   created_at: string;
   updated_at: string;
 };
@@ -72,32 +70,38 @@ function BoardDetailsPage(): ReactElement | null {
       description: "",
     });
 
-    useEffect(() => {
-      const openedFromWorkspace = sessionStorage.getItem(
+  useEffect(() => {
+    const openedFromWorkspace =
+      sessionStorage.getItem(
         `board-opened-${boardId}`,
       );
 
-      if (!openedFromWorkspace) {
-        void navigate({
-          to: "/workspaces/$workspaceId",
-          params: {
-            workspaceId,
-          },
-          replace: true,
-        });
+    if (!openedFromWorkspace) {
+      void navigate({
+        to: "/workspaces/$workspaceId",
+        params: {
+          workspaceId,
+        },
+        replace: true,
+      });
 
-        return;
-      }
-      sessionStorage.removeItem(
-        `board-opened-${boardId}`,
-      );
+      return;
+    }
 
-      setCanShowBoard(true);
-    }, [boardId, navigate, workspaceId]);
-      useEffect(() => {
-        if (canShowBoard !== true) {
-          return;
-        }
+    sessionStorage.removeItem(
+      `board-opened-${boardId}`,
+    );
+
+    setCanShowBoard(true);
+  }, [boardId, navigate, workspaceId]);
+
+  useEffect(() => {
+    if (canShowBoard !== true) {
+      return;
+    }
+
+    const controller =
+      new AbortController();
 
     const fetchBoard =
       async (): Promise<void> => {
@@ -115,6 +119,7 @@ function BoardDetailsPage(): ReactElement | null {
             `${serverUrl}/api/boards/${boardId}`,
             {
               credentials: "include",
+              signal: controller.signal,
             },
           );
 
@@ -122,7 +127,6 @@ function BoardDetailsPage(): ReactElement | null {
             await navigate({
               to: "/login",
             });
-
             return;
           }
 
@@ -159,6 +163,13 @@ function BoardDetailsPage(): ReactElement | null {
               data.board.description ?? "",
           });
         } catch (fetchError: unknown) {
+          if (
+            fetchError instanceof DOMException &&
+            fetchError.name === "AbortError"
+          ) {
+            return;
+          }
+
           console.error(
             "FETCH BOARD FAILED:",
             fetchError,
@@ -168,11 +179,17 @@ function BoardDetailsPage(): ReactElement | null {
             "Something went wrong while loading the board.",
           );
         } finally {
-          setIsLoading(false);
+          if (!controller.signal.aborted) {
+            setIsLoading(false);
+          }
         }
       };
 
     void fetchBoard();
+
+    return () => {
+      controller.abort();
+    };
   }, [
     boardId,
     navigate,
@@ -223,6 +240,7 @@ function BoardDetailsPage(): ReactElement | null {
     event: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
+
     setError("");
 
     const result =
@@ -755,6 +773,7 @@ function BoardDetailsPage(): ReactElement | null {
                   #{board.workspace_id}
                 </p>
               </div>
+
               <div className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/[0.08]">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
                   Created

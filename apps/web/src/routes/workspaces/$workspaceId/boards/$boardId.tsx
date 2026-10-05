@@ -736,13 +736,6 @@ function BoardDetailsPage(): ReactElement | null {
                   #{board.workspace_id}
                 </p>
               </div>
-
-              <div className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/[0.08]">
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                  State
-                </p>
-              </div>
-
               <div className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/[0.08]">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
                   Created

@@ -2,10 +2,10 @@ BEGIN;
 
 -- Add the Kanban columns only if they do not already exist.
 ALTER TABLE cards
-ADD COLUMN IF NOT EXISTS board_id INT;
+    ADD COLUMN IF NOT EXISTS board_id INT;
 
 ALTER TABLE cards
-ADD COLUMN IF NOT EXISTS state VARCHAR(30) NOT NULL DEFAULT 'todo';
+    ADD COLUMN IF NOT EXISTS state VARCHAR(30) NOT NULL DEFAULT 'todo';
 
 -- Migrate legacy cards only when the old lists structure exists.
 DO $$
@@ -50,6 +50,13 @@ BEGIN
     END IF;
 END $$;
 
+-- Remove legacy columns after migrating their data.
+-- Dropping these columns also removes constraints that depend on them.
+ALTER TABLE cards
+    DROP COLUMN IF EXISTS list_id,
+    DROP COLUMN IF EXISTS position,
+    DROP COLUMN IF EXISTS created_by;
+
 -- Do not silently leave cards without a board.
 DO $$
 BEGIN
@@ -63,8 +70,9 @@ BEGIN
     END IF;
 END $$;
 
+-- Ensure every card belongs to a board.
 ALTER TABLE cards
-ALTER COLUMN board_id SET NOT NULL;
+    ALTER COLUMN board_id SET NOT NULL;
 
 -- Add the foreign key only if it is not already present.
 DO $$
@@ -76,10 +84,10 @@ BEGIN
           AND conname = 'cards_board_id_fkey'
     ) THEN
         ALTER TABLE cards
-        ADD CONSTRAINT cards_board_id_fkey
-        FOREIGN KEY (board_id)
-        REFERENCES boards(id)
-        ON DELETE CASCADE;
+            ADD CONSTRAINT cards_board_id_fkey
+            FOREIGN KEY (board_id)
+            REFERENCES boards(id)
+            ON DELETE CASCADE;
     END IF;
 END $$;
 

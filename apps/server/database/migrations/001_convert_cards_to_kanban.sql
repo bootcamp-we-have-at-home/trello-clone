@@ -1,11 +1,11 @@
 BEGIN;
-
+-- Add the Kanban columns only if they do not already exist.
 ALTER TABLE cards
     ADD COLUMN IF NOT EXISTS board_id INT;
 
 ALTER TABLE cards
     ADD COLUMN IF NOT EXISTS state VARCHAR(30) NOT NULL DEFAULT 'todo';
-
+-- Migrate legacy cards only when the old lists structure exists.
 DO $$
 BEGIN
     IF to_regclass('public.lists') IS NOT NULL
@@ -35,11 +35,27 @@ BEGIN
         SET
             board_id = l.board_id,
             state = CASE
-                WHEN LOWER(TRIM(l.title)) IN ('todo', 'to do')
+                WHEN LOWER(TRIM(l.title)) IN (
+                    'todo',
+                    'to do',
+                    'to_do'
+                )
                     THEN 'todo'
-                WHEN LOWER(TRIM(l.title)) = 'doing'
+
+                WHEN LOWER(TRIM(l.title)) IN (
+                    'doing',
+                    'in_progress',
+                    'in progress',
+                    'in-progress',
+                    'inprogress'
+                )
                     THEN 'doing'
-                WHEN LOWER(TRIM(l.title)) = 'done'
+
+                WHEN LOWER(TRIM(l.title)) IN (
+                    'done',
+                    'completed',
+                    'complete'
+                )
                     THEN 'done'
                 ELSE 'todo'
             END
@@ -48,11 +64,13 @@ BEGIN
     END IF;
 END $$;
 
+-- Remove legacy columns after migrating their data.
 ALTER TABLE cards
     DROP COLUMN IF EXISTS list_id,
     DROP COLUMN IF EXISTS position,
     DROP COLUMN IF EXISTS created_by;
 
+-- Do not silently leave cards without a board.
 DO $$
 BEGIN
     IF EXISTS (
@@ -65,9 +83,11 @@ BEGIN
     END IF;
 END $$;
 
+-- Ensure every card belongs to a board.
 ALTER TABLE cards
     ALTER COLUMN board_id SET NOT NULL;
 
+-- Add the foreign key only if it is not already present.
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -84,10 +104,16 @@ BEGIN
     END IF;
 END $$;
 
+-- Normalize existing card states to the supported Kanban values.
 UPDATE cards
 SET state = CASE
-    WHEN LOWER(TRIM(state)) IN ('todo', 'to do', 'to_do')
+    WHEN LOWER(TRIM(state)) IN (
+        'todo',
+        'to do',
+        'to_do'
+    )
         THEN 'todo'
+
     WHEN LOWER(TRIM(state)) IN (
         'doing',
         'in_progress',
@@ -96,14 +122,21 @@ SET state = CASE
         'inprogress'
     )
         THEN 'doing'
-    WHEN LOWER(TRIM(state)) IN ('done', 'completed', 'complete')
+
+    WHEN LOWER(TRIM(state)) IN (
+        'done',
+        'completed',
+        'complete'
+    )
         THEN 'done'
     ELSE 'todo'
 END;
 
+-- Ensure every card has a state.
 ALTER TABLE cards
     ALTER COLUMN state SET NOT NULL;
 
+-- Enforce the three supported Kanban states.
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -113,9 +146,3 @@ BEGIN
           AND conname = 'cards_state_kanban_check'
     ) THEN
         ALTER TABLE cards
-            ADD CONSTRAINT cards_state_kanban_check
-            CHECK (state IN ('todo', 'doing', 'done'));
-    END IF;
-END $$;
-
-COMMIT;

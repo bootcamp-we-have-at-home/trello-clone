@@ -146,3 +146,9 @@ BEGIN
           AND conname = 'cards_state_kanban_check'
     ) THEN
         ALTER TABLE cards
+            ADD CONSTRAINT cards_state_kanban_check
+            CHECK (state IN ('todo', 'doing', 'done'));
+    END IF;
+END $$;
+
+COMMIT;

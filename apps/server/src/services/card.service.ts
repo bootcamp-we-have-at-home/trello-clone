@@ -8,7 +8,7 @@ export const getBoardCards = async (userId: number, boardId: number) => {
       c.title,
       c.description,
       c.state,
-      c.due_date,
+      c.due_date::TEXT AS due_date,
       c.board_id,
       c.created_at,
       c.updated_at

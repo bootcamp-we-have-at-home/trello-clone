@@ -48,37 +48,46 @@ export const Route = createFileRoute(
 )({
   component: BoardDetailsPage,
 });
+const formatDueDate = (dateString: string): string => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(
+    dateString,
+  );
+
+  if (!match) {
+    return dateString;
+  }
+  const year = match[1]!;
+  const month = match[2]!;
+  const day = match[3]!;
+
+  return `${month}/${day}/${year}`;
+};
 
 function BoardDetailsPage(): ReactElement | null {
   const navigate = useNavigate();
 
-  const { workspaceId, boardId } =
-    Route.useParams();
+  const { workspaceId, boardId } = Route.useParams();
 
-  const [board, setBoard] =
-    useState<Board | null>(null);
+  const [board, setBoard] = useState<Board | null>(
+    null,
+  );
 
   const [cards, setCards] = useState<Card[]>([]);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isCardsLoading, setIsCardsLoading] =
     useState(true);
 
   const [error, setError] = useState("");
 
-  const [cardsError, setCardsError] =
-    useState("");
+  const [cardsError, setCardsError] = useState("");
 
-  const [isEditing, setIsEditing] =
-    useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [isSaving, setIsSaving] =
-    useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [isDeleting, setIsDeleting] =
-    useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] =
     useState<UpdateBoardInput>({
@@ -122,12 +131,9 @@ function BoardDetailsPage(): ReactElement | null {
         }
 
         if (!response.ok) {
-          const data =
-            (await response
-              .json()
-              .catch(() => null)) as
-              | ErrorResponse
-              | null;
+          const data = (await response
+            .json()
+            .catch(() => null)) as ErrorResponse | null;
 
           setError(
             data?.message ??
@@ -145,8 +151,7 @@ function BoardDetailsPage(): ReactElement | null {
 
         setFormData({
           title: data.board.title,
-          description:
-            data.board.description ?? "",
+          description: data.board.description ?? "",
         });
       } catch (fetchError: unknown) {
         if (
@@ -209,12 +214,9 @@ function BoardDetailsPage(): ReactElement | null {
         }
 
         if (!response.ok) {
-          const data =
-            (await response
-              .json()
-              .catch(() => null)) as
-              | ErrorResponse
-              | null;
+          const data = (await response
+            .json()
+            .catch(() => null)) as ErrorResponse | null;
 
           setCardsError(
             data?.message ??
@@ -266,8 +268,7 @@ function BoardDetailsPage(): ReactElement | null {
 
     setFormData({
       title: board.title,
-      description:
-        board.description ?? "",
+      description: board.description ?? "",
     });
 
     setIsEditing(true);
@@ -281,8 +282,7 @@ function BoardDetailsPage(): ReactElement | null {
 
     setFormData({
       title: board.title,
-      description:
-        board.description ?? "",
+      description: board.description ?? "",
     });
 
     setIsEditing(false);
@@ -305,12 +305,10 @@ function BoardDetailsPage(): ReactElement | null {
     event.preventDefault();
     setError("");
 
-    const result =
-      updateBoardSchema.safeParse(formData);
+    const result = updateBoardSchema.safeParse(formData);
 
     if (!result.success) {
-      const firstIssue =
-        result.error.issues[0];
+      const firstIssue = result.error.issues[0];
 
       setError(
         firstIssue?.message ??
@@ -350,12 +348,9 @@ function BoardDetailsPage(): ReactElement | null {
       }
 
       if (!response.ok) {
-        const data =
-          (await response
-            .json()
-            .catch(() => null)) as
-            | ErrorResponse
-            | null;
+        const data = (await response
+          .json()
+          .catch(() => null)) as ErrorResponse | null;
 
         setError(
           data?.message ??
@@ -373,8 +368,7 @@ function BoardDetailsPage(): ReactElement | null {
 
       setFormData({
         title: data.board.title,
-        description:
-          data.board.description ?? "",
+        description: data.board.description ?? "",
       });
 
       setIsEditing(false);
@@ -398,88 +392,84 @@ function BoardDetailsPage(): ReactElement | null {
     }
   };
 
-  const handleDeleteBoard =
-    async (): Promise<void> => {
-      const confirmed = window.confirm(
-        "Are you sure you want to delete this board?",
+  const handleDeleteBoard = async (): Promise<void> => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this board?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setError("");
+
+      const serverUrl =
+        import.meta.env.VITE_SERVER_URL.replace(
+          /\/+$/,
+          "",
+        );
+
+      const response = await fetch(
+        `${serverUrl}/api/boards/${boardId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
       );
 
-      if (!confirmed) {
+      if (response.status === 401) {
+        await navigate({
+          to: "/login",
+        });
+
         return;
       }
 
-      try {
-        setIsDeleting(true);
-        setError("");
-
-        const serverUrl =
-          import.meta.env.VITE_SERVER_URL.replace(
-            /\/+$/,
-            "",
-          );
-
-        const response = await fetch(
-          `${serverUrl}/api/boards/${boardId}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          },
-        );
-
-        if (response.status === 401) {
-          await navigate({
-            to: "/login",
-          });
-
-          return;
-        }
-
-        if (!response.ok) {
-          const data =
-            (await response
-              .json()
-              .catch(() => null)) as
-              | ErrorResponse
-              | null;
-
-          setError(
-            data?.message ??
-              data?.error ??
-              "Failed to delete board.",
-          );
-
-          return;
-        }
-
-        window.dispatchEvent(
-          new CustomEvent("board-deleted", {
-            detail: {
-              id: Number(boardId),
-              workspace_id: Number(workspaceId),
-            },
-          }),
-        );
-
-        await navigate({
-          to: "/workspaces/$workspaceId",
-          params: {
-            workspaceId,
-          },
-          replace: true,
-        });
-      } catch (deleteError: unknown) {
-        console.error(
-          "DELETE BOARD FAILED:",
-          deleteError,
-        );
+      if (!response.ok) {
+        const data = (await response
+          .json()
+          .catch(() => null)) as ErrorResponse | null;
 
         setError(
-          "Something went wrong while deleting the board.",
+          data?.message ??
+            data?.error ??
+            "Failed to delete board.",
         );
-      } finally {
-        setIsDeleting(false);
+
+        return;
       }
-    };
+
+      window.dispatchEvent(
+        new CustomEvent("board-deleted", {
+          detail: {
+            id: Number(boardId),
+            workspace_id: Number(workspaceId),
+          },
+        }),
+      );
+
+      await navigate({
+        to: "/workspaces/$workspaceId",
+        params: {
+          workspaceId,
+        },
+        replace: true,
+      });
+    } catch (deleteError: unknown) {
+      console.error(
+        "DELETE BOARD FAILED:",
+        deleteError,
+      );
+
+      setError(
+        "Something went wrong while deleting the board.",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const columns: Array<{
     key: Card["state"];
@@ -612,15 +602,11 @@ function BoardDetailsPage(): ReactElement | null {
 
               <button
                 type="button"
-                onClick={() =>
-                  void handleDeleteBoard()
-                }
+                onClick={() => void handleDeleteBoard()}
                 disabled={isDeleting}
                 className="inline-flex items-center gap-2 rounded-xl border border-red-300/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isDeleting
-                  ? "Deleting..."
-                  : "Delete"}
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           )}
@@ -684,9 +670,7 @@ function BoardDetailsPage(): ReactElement | null {
 
                 <textarea
                   id="board-description"
-                  value={
-                    formData.description ?? ""
-                  }
+                  value={formData.description ?? ""}
                   onChange={(event) =>
                     handleInputChange(
                       "description",
@@ -709,9 +693,7 @@ function BoardDetailsPage(): ReactElement | null {
                   disabled={isSaving}
                   className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-[#132f48] shadow-lg transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isSaving
-                    ? "Saving..."
-                    : "Save Changes"}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </button>
 
                 <button
@@ -797,11 +779,9 @@ function BoardDetailsPage(): ReactElement | null {
           ) : (
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               {columns.map((column) => {
-                const columnCards =
-                  cards.filter(
-                    (card) =>
-                      card.state === column.key,
-                  );
+                const columnCards = cards.filter(
+                  (card) => card.state === column.key,
+                );
 
                 return (
                   <div
@@ -849,9 +829,7 @@ function BoardDetailsPage(): ReactElement | null {
                               {card.due_date && (
                                 <span>
                                   Due{" "}
-                                  {new Date(
-                                    card.due_date,
-                                  ).toLocaleDateString()}
+                                  {formatDueDate(card.due_date)}
                                 </span>
                               )}
                             </div>

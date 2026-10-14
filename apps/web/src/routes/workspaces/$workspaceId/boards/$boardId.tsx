@@ -68,32 +68,23 @@ function BoardDetailsPage(): ReactElement | null {
 
   const { workspaceId, boardId } = Route.useParams();
 
-  const [board, setBoard] = useState<Board | null>(
-    null,
-  );
-
+  const [board, setBoard] = useState<Board | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
-
-  const [isCardsLoading, setIsCardsLoading] =
-    useState(true);
+  const [isCardsLoading, setIsCardsLoading] = useState(true);
 
   const [error, setError] = useState("");
-
   const [cardsError, setCardsError] = useState("");
 
   const [isEditing, setIsEditing] = useState(false);
-
   const [isSaving, setIsSaving] = useState(false);
-
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const [formData, setFormData] =
-    useState<UpdateBoardInput>({
-      title: "",
-      description: "",
-    });
+  const [formData, setFormData] = useState<UpdateBoardInput>({
+    title: "",
+    description: "",
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -102,12 +93,13 @@ function BoardDetailsPage(): ReactElement | null {
       try {
         setIsLoading(true);
         setError("");
+        setBoard(null);
+        setCards([]);
+        setCardsError("");
+        setIsEditing(false);
 
         const serverUrl =
-          import.meta.env.VITE_SERVER_URL.replace(
-            /\/+$/,
-            "",
-          );
+          import.meta.env.VITE_SERVER_URL.replace(/\/+$/, "");
 
         const response = await fetch(
           `${serverUrl}/api/boards/${boardId}`,
@@ -118,10 +110,7 @@ function BoardDetailsPage(): ReactElement | null {
         );
 
         if (response.status === 401) {
-          await navigate({
-            to: "/login",
-          });
-
+          await navigate({ to: "/login" });
           return;
         }
 
@@ -147,6 +136,19 @@ function BoardDetailsPage(): ReactElement | null {
         const data =
           (await response.json()) as BoardResponse;
 
+        // Reject a board that does not belong to this route's workspace.
+        if (
+          Number(data.board.workspace_id) !==
+          Number(workspaceId)
+        ) {
+          setBoard(null);
+          setCards([]);
+          setError(
+            "This board does not belong to this workspace.",
+          );
+          return;
+        }
+
         setBoard(data.board);
 
         setFormData({
@@ -161,10 +163,7 @@ function BoardDetailsPage(): ReactElement | null {
           return;
         }
 
-        console.error(
-          "FETCH BOARD FAILED:",
-          fetchError,
-        );
+        console.error("FETCH BOARD FAILED:", fetchError);
 
         setError(
           "Something went wrong while loading the board.",
@@ -181,21 +180,28 @@ function BoardDetailsPage(): ReactElement | null {
     return () => {
       controller.abort();
     };
-  }, [boardId, navigate]);
+  }, [boardId, workspaceId, navigate]);
 
   useEffect(() => {
     const controller = new AbortController();
 
     const fetchCards = async (): Promise<void> => {
+      // Do not request cards until the board has been validated.
+      if (
+        !board ||
+        Number(board.workspace_id) !== Number(workspaceId)
+      ) {
+        setCards([]);
+        setIsCardsLoading(false);
+        return;
+      }
+
       try {
         setIsCardsLoading(true);
         setCardsError("");
 
         const serverUrl =
-          import.meta.env.VITE_SERVER_URL.replace(
-            /\/+$/,
-            "",
-          );
+          import.meta.env.VITE_SERVER_URL.replace(/\/+$/, "");
 
         const response = await fetch(
           `${serverUrl}/api/boards/${boardId}/cards`,
@@ -206,10 +212,7 @@ function BoardDetailsPage(): ReactElement | null {
         );
 
         if (response.status === 401) {
-          await navigate({
-            to: "/login",
-          });
-
+          await navigate({ to: "/login" });
           return;
         }
 
@@ -239,10 +242,7 @@ function BoardDetailsPage(): ReactElement | null {
           return;
         }
 
-        console.error(
-          "FETCH CARDS FAILED:",
-          fetchError,
-        );
+        console.error("FETCH CARDS FAILED:", fetchError);
 
         setCardsError(
           "Something went wrong while loading cards.",
@@ -259,10 +259,16 @@ function BoardDetailsPage(): ReactElement | null {
     return () => {
       controller.abort();
     };
-  }, [boardId, navigate]);
+  }, [board, boardId, workspaceId, navigate]);
 
   const handleStartEditing = (): void => {
-    if (!board) {
+    if (
+      !board ||
+      Number(board.workspace_id) !== Number(workspaceId)
+    ) {
+      setError(
+        "This board does not belong to this workspace.",
+      );
       return;
     }
 
@@ -305,6 +311,16 @@ function BoardDetailsPage(): ReactElement | null {
     event.preventDefault();
     setError("");
 
+    if (
+      !board ||
+      Number(board.workspace_id) !== Number(workspaceId)
+    ) {
+      setError(
+        "This board does not belong to this workspace.",
+      );
+      return;
+    }
+
     const result = updateBoardSchema.safeParse(formData);
 
     if (!result.success) {
@@ -322,10 +338,7 @@ function BoardDetailsPage(): ReactElement | null {
       setIsSaving(true);
 
       const serverUrl =
-        import.meta.env.VITE_SERVER_URL.replace(
-          /\/+$/,
-          "",
-        );
+        import.meta.env.VITE_SERVER_URL.replace(/\/+$/, "");
 
       const response = await fetch(
         `${serverUrl}/api/boards/${boardId}`,
@@ -340,10 +353,7 @@ function BoardDetailsPage(): ReactElement | null {
       );
 
       if (response.status === 401) {
-        await navigate({
-          to: "/login",
-        });
-
+        await navigate({ to: "/login" });
         return;
       }
 
@@ -364,6 +374,17 @@ function BoardDetailsPage(): ReactElement | null {
       const data =
         (await response.json()) as BoardResponse;
 
+      // Validate the server response before updating the UI.
+      if (
+        Number(data.board.workspace_id) !==
+        Number(workspaceId)
+      ) {
+        setError(
+          "The server returned a board from another workspace.",
+        );
+        return;
+      }
+
       setBoard(data.board);
 
       setFormData({
@@ -379,10 +400,7 @@ function BoardDetailsPage(): ReactElement | null {
         }),
       );
     } catch (updateError: unknown) {
-      console.error(
-        "UPDATE BOARD FAILED:",
-        updateError,
-      );
+      console.error("UPDATE BOARD FAILED:", updateError);
 
       setError(
         "Something went wrong while updating the board.",
@@ -393,6 +411,16 @@ function BoardDetailsPage(): ReactElement | null {
   };
 
   const handleDeleteBoard = async (): Promise<void> => {
+    if (
+      !board ||
+      Number(board.workspace_id) !== Number(workspaceId)
+    ) {
+      setError(
+        "This board does not belong to this workspace.",
+      );
+      return;
+    }
+
     const confirmed = window.confirm(
       "Are you sure you want to delete this board?",
     );
@@ -406,10 +434,7 @@ function BoardDetailsPage(): ReactElement | null {
       setError("");
 
       const serverUrl =
-        import.meta.env.VITE_SERVER_URL.replace(
-          /\/+$/,
-          "",
-        );
+        import.meta.env.VITE_SERVER_URL.replace(/\/+$/, "");
 
       const response = await fetch(
         `${serverUrl}/api/boards/${boardId}`,
@@ -420,10 +445,7 @@ function BoardDetailsPage(): ReactElement | null {
       );
 
       if (response.status === 401) {
-        await navigate({
-          to: "/login",
-        });
-
+        await navigate({ to: "/login" });
         return;
       }
 
@@ -452,16 +474,11 @@ function BoardDetailsPage(): ReactElement | null {
 
       await navigate({
         to: "/workspaces/$workspaceId",
-        params: {
-          workspaceId,
-        },
+        params: { workspaceId },
         replace: true,
       });
     } catch (deleteError: unknown) {
-      console.error(
-        "DELETE BOARD FAILED:",
-        deleteError,
-      );
+      console.error("DELETE BOARD FAILED:", deleteError);
 
       setError(
         "Something went wrong while deleting the board.",
@@ -475,18 +492,9 @@ function BoardDetailsPage(): ReactElement | null {
     key: Card["state"];
     title: string;
   }> = [
-    {
-      key: "todo",
-      title: "To do",
-    },
-    {
-      key: "doing",
-      title: "Doing",
-    },
-    {
-      key: "done",
-      title: "Done",
-    },
+    { key: "todo", title: "To do" },
+    { key: "doing", title: "Doing" },
+    { key: "done", title: "Done" },
   ];
 
   if (isLoading) {
@@ -650,10 +658,7 @@ function BoardDetailsPage(): ReactElement | null {
                   type="text"
                   value={formData.title}
                   onChange={(event) =>
-                    handleInputChange(
-                      "title",
-                      event.target.value,
-                    )
+                    handleInputChange("title", event.target.value)
                   }
                   className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none focus:border-white/30 focus:ring-2 focus:ring-white/10"
                   placeholder="Enter board title"
@@ -822,14 +827,11 @@ function BoardDetailsPage(): ReactElement | null {
                             )}
 
                             <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
-                              <span>
-                                Card #{card.id}
-                              </span>
+                              <span>Card #{card.id}</span>
 
                               {card.due_date && (
                                 <span>
-                                  Due{" "}
-                                  {formatDueDate(card.due_date)}
+                                  Due {formatDueDate(card.due_date)}
                                 </span>
                               )}
                             </div>
